@@ -1,10 +1,21 @@
 body {
   text-align: center;
-  background-color: #f0f0f0;
+  background-color: #cceeff; /* Light blue */
   font-family: sans-serif;
 }
 
 canvas {
   border: 2px solid #000;
   background-color: #fff;
+}
+
+#home-screen, #game-over-screen {
+  margin-top: 50px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
 }
