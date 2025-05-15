@@ -3,15 +3,36 @@ const ctx = canvas.getContext("2d");
 
 const box = 20;
 const canvasSize = 400;
-let snake = [{ x: 160, y: 160 }];
-let direction = "RIGHT";
-let food = {
-  x: Math.floor(Math.random() * (canvasSize / box)) * box,
-  y: Math.floor(Math.random() * (canvasSize / box)) * box
-};
-let score = 0;
+let snake, direction, food, score, snakeColor;
 
 document.addEventListener("keydown", changeDirection);
+
+function goHome() {
+  document.getElementById("game-over-screen").style.display = "none";
+  document.getElementById("home-screen").style.display = "block";
+}
+
+function startGame() {
+  // Get selected color
+  snakeColor = document.getElementById("colorPicker").value;
+
+  // Initialize game state
+  snake = [{ x: 160, y: 160 }];
+  direction = "RIGHT";
+  score = 0;
+  food = {
+    x: Math.floor(Math.random() * (canvasSize / box)) * box,
+    y: Math.floor(Math.random() * (canvasSize / box)) * box
+  };
+
+  // Show game, hide other screens
+  document.getElementById("home-screen").style.display = "none";
+  document.getElementById("game-over-screen").style.display = "none";
+  document.getElementById("game-screen").style.display = "block";
+
+  clearInterval(gameInterval);
+  gameInterval = setInterval(draw, 150);
+}
 
 function changeDirection(e) {
   if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
@@ -20,11 +41,13 @@ function changeDirection(e) {
   else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
 }
 
+let gameInterval;
+
 function draw() {
   ctx.clearRect(0, 0, canvasSize, canvasSize);
 
   for (let i = 0; i < snake.length; i++) {
-    ctx.fillStyle = i === 0 ? "green" : "lightgreen";
+    ctx.fillStyle = i === 0 ? snakeColor : "lightgreen";
     ctx.fillRect(snake[i].x, snake[i].y, box, box);
   }
 
@@ -38,14 +61,16 @@ function draw() {
   else if (direction === "RIGHT") head.x += box;
   else if (direction === "DOWN") head.y += box;
 
-  // Game over
+  // Game over condition
   if (
     head.x < 0 || head.y < 0 ||
     head.x >= canvasSize || head.y >= canvasSize ||
     snake.some(segment => segment.x === head.x && segment.y === head.y)
   ) {
-    alert("Game Over! Score: " + score);
-    document.location.reload();
+    clearInterval(gameInterval);
+    document.getElementById("finalScore").innerText = score;
+    document.getElementById("game-screen").style.display = "none";
+    document.getElementById("game-over-screen").style.display = "block";
     return;
   }
 
@@ -61,5 +86,3 @@ function draw() {
     snake.pop();
   }
 }
-
-setInterval(draw, 150);
