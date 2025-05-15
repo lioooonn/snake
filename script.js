@@ -10,13 +10,14 @@ let food;
 let score = 0;
 let snakeColor = "#00cc00";
 let gameInterval = null;
+let isPlaying = false;
 
 document.addEventListener("keydown", changeDirection);
 
 function goHome() {
-  // Stop any ongoing game
   clearInterval(gameInterval);
   gameInterval = null;
+  isPlaying = false;
 
   document.getElementById("game-over-screen").style.display = "none";
   document.getElementById("game-screen").style.display = "none";
@@ -28,6 +29,7 @@ function startGame() {
   snake = [{ x: 160, y: 160 }];
   direction = "RIGHT";
   score = 0;
+  isPlaying = true;
 
   food = {
     x: Math.floor(Math.random() * (canvasSize / box)) * box,
@@ -43,7 +45,7 @@ function startGame() {
 }
 
 function changeDirection(e) {
-  if (direction === "") return; // Prevent input before game starts
+  if (!isPlaying) return;
 
   if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
   else if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
@@ -52,6 +54,8 @@ function changeDirection(e) {
 }
 
 function draw() {
+  if (!isPlaying) return; // Prevent draw from doing anything if not playing
+
   ctx.clearRect(0, 0, canvasSize, canvasSize);
 
   for (let i = 0; i < snake.length; i++) {
@@ -69,6 +73,7 @@ function draw() {
   else if (direction === "RIGHT") head.x += box;
   else if (direction === "DOWN") head.y += box;
 
+  // Game over check
   if (
     head.x < 0 || head.y < 0 ||
     head.x >= canvasSize || head.y >= canvasSize ||
@@ -76,6 +81,8 @@ function draw() {
   ) {
     clearInterval(gameInterval);
     gameInterval = null;
+    isPlaying = false;
+
     document.getElementById("finalScore").innerText = score;
     document.getElementById("game-screen").style.display = "none";
     document.getElementById("game-over-screen").style.display = "block";
