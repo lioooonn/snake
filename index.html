@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Snake Game</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Snake Game</h1>
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <div id="home-screen">
+    <h1>Snake Game</h1>
+    <p>Select your snake color:</p>
+    <input type="color" id="colorPicker" value="#00cc00"/>
+    <br><br>
+    <button onclick="startGame()">Play</button>
+  </div>
+
+  <div id="game-screen" style="display: none;">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <div id="game-over-screen" style="display: none;">
+    <h2>Game Over</h2>
+    <p>Your score: <span id="finalScore">0</span></p>
+    <button onclick="startGame()">Play Again</button>
+    <button onclick="goHome()">Back to Home</button>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
