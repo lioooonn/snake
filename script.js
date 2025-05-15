@@ -101,4 +101,3 @@ function draw() {
     snake.pop();
   }
 }
-
