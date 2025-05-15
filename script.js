@@ -3,29 +3,37 @@ const ctx = canvas.getContext("2d");
 
 const box = 20;
 const canvasSize = 400;
-let snake, direction, food, score, snakeColor;
+
+let snake = [];
+let direction = "";
+let food;
+let score = 0;
+let snakeColor = "#00cc00";
+let gameInterval = null;
 
 document.addEventListener("keydown", changeDirection);
 
 function goHome() {
+  // Stop any ongoing game
+  clearInterval(gameInterval);
+  gameInterval = null;
+
   document.getElementById("game-over-screen").style.display = "none";
+  document.getElementById("game-screen").style.display = "none";
   document.getElementById("home-screen").style.display = "block";
 }
 
 function startGame() {
-  // Get selected color
   snakeColor = document.getElementById("colorPicker").value;
-
-  // Initialize game state
   snake = [{ x: 160, y: 160 }];
   direction = "RIGHT";
   score = 0;
+
   food = {
     x: Math.floor(Math.random() * (canvasSize / box)) * box,
     y: Math.floor(Math.random() * (canvasSize / box)) * box
   };
 
-  // Show game, hide other screens
   document.getElementById("home-screen").style.display = "none";
   document.getElementById("game-over-screen").style.display = "none";
   document.getElementById("game-screen").style.display = "block";
@@ -35,13 +43,13 @@ function startGame() {
 }
 
 function changeDirection(e) {
+  if (direction === "") return; // Prevent input before game starts
+
   if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
   else if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
   else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
   else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
 }
-
-let gameInterval;
 
 function draw() {
   ctx.clearRect(0, 0, canvasSize, canvasSize);
@@ -61,13 +69,13 @@ function draw() {
   else if (direction === "RIGHT") head.x += box;
   else if (direction === "DOWN") head.y += box;
 
-  // Game over condition
   if (
     head.x < 0 || head.y < 0 ||
     head.x >= canvasSize || head.y >= canvasSize ||
     snake.some(segment => segment.x === head.x && segment.y === head.y)
   ) {
     clearInterval(gameInterval);
+    gameInterval = null;
     document.getElementById("finalScore").innerText = score;
     document.getElementById("game-screen").style.display = "none";
     document.getElementById("game-over-screen").style.display = "block";
@@ -86,3 +94,4 @@ function draw() {
     snake.pop();
   }
 }
+
