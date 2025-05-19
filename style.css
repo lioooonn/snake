@@ -1,8 +1,10 @@
-/* General layout */
-body {
+/* Apply full-screen flex layout */
+html, body {
   margin: 0;
   padding: 0;
-  height: 100vh;
+  height: 100%;
+  width: 100%;
+  font-family: sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,36 +16,37 @@ body {
     linear-gradient(-45deg, transparent 75%, #3a773a 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
-  font-family: sans-serif;
 }
 
-/* Shared screen style */
-#home-screen, #game-screen, #game-over-screen {
+/* Each screen fills the page and centers its content */
+.screen {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
-/* Center everything inside the screen */
+/* Logo image */
+#logo {
+  max-width: 200px;
+  margin-bottom: 20px;
+}
+
+/* Canvas styling */
 canvas {
   border: 2px solid #000;
   background-color: #fff;
 }
 
-h1, h2, p {
-  margin: 10px 0;
-}
-
+/* Buttons and inputs */
 button {
   padding: 10px 20px;
   font-size: 16px;
   margin: 10px;
   cursor: pointer;
-}
-
-/* Custom image logo */
-#logo {
-  max-width: 200px;
-  margin-bottom: 20px;
 }
