@@ -1,13 +1,15 @@
-/* Apply full-screen flex layout */
-html, body {
+/* Base reset */
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body with checkered background */
+html, body {
   height: 100%;
   width: 100%;
   font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   background-color: #336633;
   background-image: 
     linear-gradient(45deg, #3a773a 25%, transparent 25%), 
@@ -16,28 +18,28 @@ html, body {
     linear-gradient(-45deg, transparent 75%, #3a773a 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+  overflow: hidden;
 }
 
-/* Each screen fills the page and centers its content */
+/* Each screen fills the window and centers content */
 .screen {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0;
   height: 100%;
   width: 100%;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
 }
 
-/* Logo image */
-#logo {
-  max-width: 200px;
-  margin-bottom: 20px;
+/* Show the active screen */
+.screen.active {
+  display: flex;
 }
 
-/* Canvas styling */
+/* Canvas stays centered */
 canvas {
   border: 2px solid #000;
   background-color: #fff;
@@ -49,4 +51,10 @@ button {
   font-size: 16px;
   margin: 10px;
   cursor: pointer;
+}
+
+/* Logo */
+#logo {
+  max-width: 200px;
+  margin-bottom: 20px;
 }
