@@ -1,25 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Snake Game</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
 <body>
 
+  <!-- HOME SCREEN -->
   <div id="home-screen">
+    <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
     <h1>Snake Game</h1>
     <p>Select your snake color:</p>
     <input type="color" id="colorPicker" value="#00cc00"/>
-    <br><br>
+    <br>
     <button onclick="startGame()">Play</button>
   </div>
 
+  <!-- GAME SCREEN -->
   <div id="game-screen" style="display: none;">
     <canvas id="gameCanvas" width="400" height="400"></canvas>
   </div>
 
+  <!-- GAME OVER SCREEN -->
   <div id="game-over-screen" style="display: none;">
     <h2>Game Over</h2>
     <p>Your score: <span id="finalScore">0</span></p>
@@ -29,4 +25,3 @@
 
   <script src="script.js"></script>
 </body>
-</html>
