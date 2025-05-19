@@ -14,14 +14,18 @@ let isPlaying = false;
 
 document.addEventListener("keydown", changeDirection);
 
+function showScreen(screenId) {
+  document.querySelectorAll(".screen").forEach(screen => {
+    screen.classList.remove("active");
+  });
+  document.getElementById(screenId).classList.add("active");
+}
+
 function goHome() {
   clearInterval(gameInterval);
   gameInterval = null;
   isPlaying = false;
-
-  document.getElementById("game-over-screen").style.display = "none";
-  document.getElementById("game-screen").style.display = "none";
-  document.getElementById("home-screen").style.display = "block";
+  showScreen("home-screen");
 }
 
 function startGame() {
@@ -36,12 +40,9 @@ function startGame() {
     y: Math.floor(Math.random() * (canvasSize / box)) * box
   };
 
-  document.getElementById("home-screen").style.display = "none";
-  document.getElementById("game-over-screen").style.display = "none";
-  document.getElementById("game-screen").style.display = "block";
-
   clearInterval(gameInterval);
   gameInterval = setInterval(draw, 150);
+  showScreen("game-screen");
 }
 
 function changeDirection(e) {
@@ -84,6 +85,7 @@ function draw() {
     isPlaying = false;
 
     document.getElementById("finalScore").innerText = score;
+    showScreen("game-over-screen");
     document.getElementById("game-screen").style.display = "none";
     document.getElementById("game-over-screen").style.display = "block";
     return;
