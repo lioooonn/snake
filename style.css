@@ -1,12 +1,7 @@
-/* Base reset */
-* {
+/* Reset and background */
+html, body {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-/* Body with checkered background */
-html, body {
   height: 100%;
   width: 100%;
   font-family: sans-serif;
@@ -18,10 +13,9 @@ html, body {
     linear-gradient(-45deg, transparent 75%, #3a773a 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
-  overflow: hidden;
 }
 
-/* Each screen fills the window and centers content */
+/* All screen containers */
 .screen {
   position: fixed;
   top: 0; left: 0;
@@ -34,27 +28,26 @@ html, body {
   text-align: center;
 }
 
-/* Show the active screen */
 .screen.active {
   display: flex;
 }
 
-/* Canvas stays centered */
+/* Canvas */
 canvas {
   border: 2px solid #000;
   background-color: #fff;
-}
-
-/* Buttons and inputs */
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  margin: 10px;
-  cursor: pointer;
 }
 
 /* Logo */
 #logo {
   max-width: 200px;
   margin-bottom: 20px;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
 }
