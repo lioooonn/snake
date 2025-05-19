@@ -6,21 +6,24 @@
   <title>Snake Game</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-  
+
 <body>
+  <!-- HOME SCREEN -->
   <div class="screen active" id="home-screen">
     <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
     <h1>Snake Game</h1>
     <p>Select your snake color:</p>
-    <input type="color" id="colorPicker" value="#00cc00"/>
+    <input type="color" id="colorPicker" value="#00cc00" />
     <br>
     <button onclick="startGame()">Play</button>
   </div>
-  
+
+  <!-- GAME SCREEN -->
   <div class="screen" id="game-screen">
     <canvas id="gameCanvas" width="400" height="400"></canvas>
   </div>
-  
+
+  <!-- GAME OVER SCREEN -->
   <div class="screen" id="game-over-screen">
     <h2>Game Over</h2>
     <p>Your score: <span id="finalScore">0</span></p>
