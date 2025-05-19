@@ -1,16 +1,38 @@
+/* General layout */
 body {
-  text-align: center;
-  background-color: #cceeff; /* Light blue */
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #336633;
+  background-image: 
+    linear-gradient(45deg, #3a773a 25%, transparent 25%), 
+    linear-gradient(-45deg, #3a773a 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #3a773a 75%), 
+    linear-gradient(-45deg, transparent 75%, #3a773a 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
   font-family: sans-serif;
 }
 
+/* Shared screen style */
+#home-screen, #game-screen, #game-over-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Center everything inside the screen */
 canvas {
   border: 2px solid #000;
   background-color: #fff;
 }
 
-#home-screen, #game-over-screen {
-  margin-top: 50px;
+h1, h2, p {
+  margin: 10px 0;
 }
 
 button {
@@ -18,4 +40,10 @@ button {
   font-size: 16px;
   margin: 10px;
   cursor: pointer;
+}
+
+/* Custom image logo */
+#logo {
+  max-width: 200px;
+  margin-bottom: 20px;
 }
