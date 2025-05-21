@@ -92,7 +92,7 @@ function toggleTheme() {
   isDarkMode = !isDarkMode;
   localStorage.setItem('darkMode', isDarkMode);
   document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '��' : '🌞'}</span>`;
+  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
   
   // Update snake color for better visibility in dark mode
   snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
@@ -108,8 +108,8 @@ function init() {
   
   createFood();
   score = 0;
-  currentDirection = null;
-  nextDirection = null;
+  currentDirection = "ArrowRight"; // Set initial direction
+  nextDirection = "ArrowRight";    // Set initial next direction
   lastProcessedDirection = null;
   
   // Update display
@@ -211,6 +211,7 @@ function draw() {
   
   let newHead = {...snake[0]};
 
+  // Move snake
   switch(currentDirection) {
     case "ArrowLeft":
       newHead.x -= box;
@@ -248,7 +249,10 @@ function draw() {
 }
 
 function collision(head, array) {
-  return array.some(segment => segment.x === head.x && segment.y === head.y);
+  // Skip collision check with the tail piece that's about to be removed
+  // This prevents false collisions when the snake is moving
+  const checkArray = array.slice(0, -1);
+  return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
 function gameOver() {
