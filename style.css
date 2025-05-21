@@ -55,14 +55,13 @@ html, body {
 /* All screen containers */
 .screen {
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   height: 100%;
   width: 100%;
   display: none;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
 }
 
 .screen.active {
@@ -77,6 +76,7 @@ html, body {
   box-shadow: 0 4px 6px var(--container-shadow);
   max-width: 80%;
   width: 400px;
+  z-index: 1;
 }
 
 /* Game info */
@@ -306,16 +306,17 @@ button:hover {
 }
 
 #home-screen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px;
+  position: relative;
 }
 
 .side-container {
+  position: absolute;
+  left: calc(50% + 220px); /* Half screen width + half main container + gap */
+  top: 50%;
+  transform: translateY(-50%);
   background: var(--container-bg);
   padding: 20px;
   border-radius: 20px;
   box-shadow: 0 4px 6px var(--container-shadow);
-  margin-left: 20px;
+  z-index: 0;
 }

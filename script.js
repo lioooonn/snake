@@ -310,25 +310,10 @@ function collision(head, array) {
   return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
-function gameOver() {
-  isPlaying = false;
-  if (score > highScores[currentLevel]) {
-    highScores[currentLevel] = score;
-    localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-    updateHighScoresDisplay();
-  }
+function hideAllScreens() {
+  document.getElementById("home-screen").classList.remove("active");
   document.getElementById("game-screen").classList.remove("active");
-  document.getElementById("game-over-screen").classList.add("active");
-  document.getElementById("finalScore").textContent = score;
-  document.getElementById("finalLevel").textContent = currentLevel;
-  document.getElementById("levelHighScore").textContent = highScores[currentLevel];
-}
-
-function goHome() {
-  clearInterval(gameInterval);
   document.getElementById("game-over-screen").classList.remove("active");
-  document.getElementById("home-screen").classList.add("active");
-  updateHighScoresDisplay();
 }
 
 function startGame() {
@@ -338,9 +323,7 @@ function startGame() {
   currentLevel = parseInt(document.getElementById("levelSelect").value);
   init();
   
-  // Hide all screens first
-  document.getElementById("home-screen").classList.remove("active");
-  document.getElementById("game-over-screen").classList.remove("active");
+  hideAllScreens();
   document.getElementById("game-screen").classList.add("active");
   
   if (isMusicPlaying) {
@@ -348,6 +331,27 @@ function startGame() {
   }
   
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
+}
+
+function gameOver() {
+  isPlaying = false;
+  if (score > highScores[currentLevel]) {
+    highScores[currentLevel] = score;
+    localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+    updateHighScoresDisplay();
+  }
+  hideAllScreens();
+  document.getElementById("game-over-screen").classList.add("active");
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("finalLevel").textContent = currentLevel;
+  document.getElementById("levelHighScore").textContent = highScores[currentLevel];
+}
+
+function goHome() {
+  clearInterval(gameInterval);
+  hideAllScreens();
+  document.getElementById("home-screen").classList.add("active");
+  updateHighScoresDisplay();
 }
 
 // Initialize high scores display
