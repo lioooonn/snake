@@ -50,6 +50,7 @@ html, body {
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 18px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .game-info span {
@@ -62,6 +63,13 @@ canvas {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-image: 
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 40px 40px;
+  background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
 }
 
 /* Logo */
@@ -79,23 +87,79 @@ select, input[type="color"] {
   padding: 5px;
   margin: 10px 0;
   font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 /* High scores */
 .high-scores {
   margin: 20px 0;
-  padding: 10px;
+  padding: 15px;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 10px;
 }
 
 .high-scores h3 {
   margin-top: 0;
+  color: #4CAF50;
+  font-size: 24px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-#highScoresList {
-  text-align: left;
-  margin: 10px 0;
+.high-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.high-scores-grid div {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.high-scores-grid div:hover {
+  transform: scale(1.05);
+}
+
+/* Music controls */
+.music-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+#musicSelect {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#toggleMusic {
+  padding: 5px 10px;
+  margin: 0;
+  background: none;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+#toggleMusic:hover {
+  background: #f0f0f0;
+}
+
+.icon {
+  font-size: 20px;
 }
 
 /* Buttons */
@@ -108,9 +172,12 @@ button {
   color: white;
   border: none;
   border-radius: 5px;
-  transition: background 0.3s;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
   background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }

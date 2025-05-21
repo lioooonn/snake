@@ -8,9 +8,36 @@
 </head>
 
 <body>
+  <!-- Audio elements -->
   <audio id="gameMusic" loop>
-    <source src="game-music.mp3" type="audio/mp3">
+    <source src="music/track1.mp3" type="audio/mp3">
   </audio>
+  <audio id="gameMusic2" loop>
+    <source src="music/track2.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic3" loop>
+    <source src="music/track3.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic4" loop>
+    <source src="music/track4.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic5" loop>
+    <source src="music/track5.mp3" type="audio/mp3">
+  </audio>
+
+  <!-- Music selector -->
+  <div class="music-controls">
+    <select id="musicSelect" onchange="changeMusic()">
+      <option value="1">Track 1 - Retro Vibes</option>
+      <option value="2">Track 2 - Chill Mode</option>
+      <option value="3">Track 3 - Epic Journey</option>
+      <option value="4">Track 4 - Pixel Dreams</option>
+      <option value="5">Track 5 - Snake Jazz</option>
+    </select>
+    <button id="toggleMusic" onclick="toggleMusic()">
+      <span class="icon">🔊</span>
+    </button>
+  </div>
 
   <!-- HOME SCREEN -->
   <div class="screen active" id="home-screen">
@@ -30,8 +57,8 @@
         <input type="color" id="colorPicker" value="#00cc00" />
       </div>
       <div class="high-scores">
-        <h3>High Scores</h3>
-        <div id="highScoresList"></div>
+        <h3>🏆 High Scores 🏆</h3>
+        <div class="high-scores-grid" id="highScoresList"></div>
       </div>
       <button onclick="startGame()">Play</button>
     </div>

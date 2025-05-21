@@ -1,6 +1,14 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const gameMusic = document.getElementById("gameMusic");
+
+// Get all music elements
+const musicTracks = [
+  document.getElementById("gameMusic"),
+  document.getElementById("gameMusic2"),
+  document.getElementById("gameMusic3"),
+  document.getElementById("gameMusic4"),
+  document.getElementById("gameMusic5")
+];
 
 const canvasSize = 400;
 const box = 20;
@@ -8,6 +16,12 @@ const box = 20;
 let snake, food, direction, score, gameInterval, isPlaying = false;
 let snakeColor = "#00cc00"; // Default color
 let currentLevel = 1;
+let lastMoveTime = 0;
+let currentMusic = musicTracks[0];
+let isMusicPlaying = true;
+let lastDirection = null;
+let canChangeDirection = true;
+
 let gameSpeeds = {
   1: 150, // Normal speed
   2: 100, // Fast
@@ -21,13 +35,83 @@ let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
   3: 0
 };
 
-// Update high scores display
+// Music controls
+function changeMusic() {
+  const trackIndex = parseInt(document.getElementById("musicSelect").value) - 1;
+  currentMusic.pause();
+  currentMusic.currentTime = 0;
+  currentMusic = musicTracks[trackIndex];
+  if (isMusicPlaying) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+  }
+}
+
+function toggleMusic() {
+  const btn = document.getElementById("toggleMusic");
+  if (isMusicPlaying) {
+    currentMusic.pause();
+    btn.innerHTML = '<span class="icon">🔇</span>';
+  } else {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    btn.innerHTML = '<span class="icon">🔊</span>';
+  }
+  isMusicPlaying = !isMusicPlaying;
+}
+
+// Update high scores display with animation
 function updateHighScoresDisplay() {
   const highScoresList = document.getElementById('highScoresList');
   highScoresList.innerHTML = '';
   for (let level in highScores) {
-    highScoresList.innerHTML += `<div>Level ${level}: ${highScores[level]}</div>`;
+    const scoreDiv = document.createElement('div');
+    scoreDiv.innerHTML = `
+      <strong>Level ${level}</strong>
+      <br>
+      <span class="score-number">${highScores[level]}</span>
+    `;
+    scoreDiv.style.animation = 'fadeIn 0.5s ease-in-out';
+    highScoresList.appendChild(scoreDiv);
   }
+}
+
+// Check if a position is occupied by the snake
+function isPositionOccupied(x, y) {
+  return snake.some(segment => segment.x === x && segment.y === y);
+}
+
+// Generate new food position
+function generateFood() {
+  let newFood;
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * (canvasSize / box)) * box,
+      y: Math.floor(Math.random() * (canvasSize / box)) * box
+    };
+  } while (isPositionOccupied(newFood.x, newFood.y));
+  return newFood;
+}
+
+// Draw a rounded rectangle
+function drawRoundedRect(x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// Draw a circle
+function drawCircle(x, y, radius) {
+  ctx.beginPath();
+  ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 // Show only the requested screen, hide the others
@@ -43,8 +127,6 @@ function goHome() {
   clearInterval(gameInterval);
   gameInterval = null;
   isPlaying = false;
-  gameMusic.pause();
-  gameMusic.currentTime = 0;
   showScreen("home-screen");
   updateHighScoresDisplay();
 }
@@ -55,20 +137,20 @@ function startGame() {
   snakeColor = document.getElementById("colorPicker").value;
   snake = [{ x: 160, y: 160 }];
   direction = "RIGHT";
+  lastDirection = direction;
   score = 0;
   isPlaying = true;
+  canChangeDirection = true;
 
   // Update display
   document.getElementById("currentLevel").textContent = currentLevel;
   document.getElementById("currentScore").textContent = score;
 
-  food = {
-    x: Math.floor(Math.random() * (canvasSize / box)) * box,
-    y: Math.floor(Math.random() * (canvasSize / box)) * box
-  };
+  food = generateFood();
 
-  // Start music
-  gameMusic.play().catch(e => console.log("Audio playback failed:", e));
+  if (!isMusicPlaying) {
+    toggleMusic();
+  }
 
   clearInterval(gameInterval);
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
@@ -83,8 +165,15 @@ function draw() {
 
   // Draw the snake
   ctx.fillStyle = snakeColor;
-  for (let segment of snake) {
-    ctx.fillRect(segment.x, segment.y, box, box);
+  for (let i = 0; i < snake.length; i++) {
+    const segment = snake[i];
+    if (i === 0) {
+      // Draw head as rounded rectangle
+      drawRoundedRect(segment.x, segment.y, box, box, 5);
+    } else {
+      // Draw body segments as rounded rectangles
+      drawRoundedRect(segment.x, segment.y, box, box, 3);
+    }
   }
 
   // Move snake
@@ -94,6 +183,9 @@ function draw() {
   if (direction === "RIGHT") head.x += box;
   if (direction === "DOWN") head.y += box;
 
+  lastDirection = direction;
+  canChangeDirection = true;
+
   // Check collisions
   if (
     head.x < 0 || head.x >= canvasSize || head.y < 0 || head.y >= canvasSize ||
@@ -101,8 +193,6 @@ function draw() {
   ) {
     isPlaying = false;
     clearInterval(gameInterval);
-    gameMusic.pause();
-    gameMusic.currentTime = 0;
 
     // Update high score if necessary
     if (score > highScores[currentLevel]) {
@@ -124,26 +214,40 @@ function draw() {
   if (head.x === food.x && head.y === food.y) {
     score++;
     document.getElementById("currentScore").textContent = score;
-    food = {
-      x: Math.floor(Math.random() * (canvasSize / box)) * box,
-      y: Math.floor(Math.random() * (canvasSize / box)) * box
-    };
+    food = generateFood();
   } else {
     snake.pop();
   }
 
   // Draw food
   ctx.fillStyle = "red";
-  ctx.fillRect(food.x, food.y, box, box);
+  drawCircle(food.x, food.y, box/2);
 }
 
-// Keyboard controls
+// Keyboard controls with improved responsiveness and prevention of quick opposite directions
 document.addEventListener("keydown", e => {
+  if (!canChangeDirection) return;
+  
   const key = e.key;
-  if (key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-  else if (key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-  else if (key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-  else if (key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+  const newDirection = 
+    key === "ArrowLeft" ? "LEFT" :
+    key === "ArrowUp" ? "UP" :
+    key === "ArrowRight" ? "RIGHT" :
+    key === "ArrowDown" ? "DOWN" : null;
+
+  if (!newDirection) return;
+
+  // Prevent 180-degree turns and ensure one move before direction change
+  const isOpposite = 
+    (newDirection === "LEFT" && lastDirection === "RIGHT") ||
+    (newDirection === "RIGHT" && lastDirection === "LEFT") ||
+    (newDirection === "UP" && lastDirection === "DOWN") ||
+    (newDirection === "DOWN" && lastDirection === "UP");
+
+  if (!isOpposite && direction !== newDirection) {
+    direction = newDirection;
+    canChangeDirection = false;
+  }
 });
 
 // Initialize high scores display
