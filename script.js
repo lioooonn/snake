@@ -1,4 +1,4 @@
-const VERSION = "PRE-ALPHA v0.0.42";
+const VERSION = "0.0.44 PRE-ALPHA";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
