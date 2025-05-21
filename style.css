@@ -305,13 +305,17 @@ button:hover {
   50% { transform: translateY(-10px); }
 }
 
+#home-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
 .side-container {
-  position: absolute;
-  right: -300px;
-  top: 50%;
-  transform: translateY(-50%);
   background: var(--container-bg);
   padding: 20px;
   border-radius: 20px;
   box-shadow: 0 4px 6px var(--container-shadow);
+  margin-left: 20px;
 }

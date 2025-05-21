@@ -126,6 +126,8 @@ function init() {
   currentDirection = "ArrowRight"; // Set initial direction
   nextDirection = "ArrowRight";    // Set initial next direction
   lastProcessedDirection = null;
+  isWaitingAtEdge = false;
+  edgeWaitStartTime = 0;
   
   // Update display
   document.getElementById("currentLevel").textContent = currentLevel;
@@ -213,7 +215,6 @@ function draw() {
     ctx.fillStyle = snakeColor;
     ctx.fill();
     
-    // Connect segments with rectangles for smoother appearance
     if (i > 0) {
       const curr = snake[i];
       const prev = snake[i-1];
@@ -240,35 +241,47 @@ function draw() {
   }
   
   let newHead = {...snake[0]};
+  let nextPosition = {...newHead};
 
-  // Move snake
+  // Calculate next position without moving yet
   switch(currentDirection) {
     case "ArrowLeft":
-      newHead.x = Math.max(0, newHead.x - box);
+      nextPosition.x -= box;
       break;
     case "ArrowUp":
-      newHead.y = Math.max(0, newHead.y - box);
+      nextPosition.y -= box;
       break;
     case "ArrowRight":
-      newHead.x = Math.min(canvasSize - box, newHead.x + box);
+      nextPosition.x += box;
       break;
     case "ArrowDown":
-      newHead.y = Math.min(canvasSize - box, newHead.y + box);
+      nextPosition.y += box;
       break;
   }
 
-  // Check if snake is at edge
-  const isAtEdge = newHead.x === 0 || newHead.x === canvasSize - box ||
-                   newHead.y === 0 || newHead.y === canvasSize - box;
+  // Check if next position would be out of bounds
+  const willHitEdge = nextPosition.x < 0 || nextPosition.x >= canvasSize ||
+                      nextPosition.y < 0 || nextPosition.y >= canvasSize;
 
-  if (isAtEdge && !isWaitingAtEdge) {
-    isWaitingAtEdge = true;
-    edgeWaitStartTime = Date.now();
+  if (willHitEdge) {
+    if (!isWaitingAtEdge) {
+      isWaitingAtEdge = true;
+      edgeWaitStartTime = Date.now();
+    } else if (Date.now() - edgeWaitStartTime > EDGE_WAIT_TIME) {
+      clearInterval(gameInterval);
+      gameOver();
+      return;
+    }
+  } else {
+    // If we're not about to hit an edge, reset the edge waiting state
+    isWaitingAtEdge = false;
+    edgeWaitStartTime = 0;
+    // Move the snake
+    newHead = nextPosition;
   }
 
-  // Game over conditions
-  if ((isWaitingAtEdge && Date.now() - edgeWaitStartTime > EDGE_WAIT_TIME) ||
-      collision(newHead, snake)) {
+  // Check for collision with self
+  if (collision(newHead, snake)) {
     clearInterval(gameInterval);
     gameOver();
     return;
