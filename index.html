@@ -8,27 +8,54 @@
 </head>
 
 <body>
+  <audio id="gameMusic" loop>
+    <source src="game-music.mp3" type="audio/mp3">
+  </audio>
+
   <!-- HOME SCREEN -->
   <div class="screen active" id="home-screen">
-    <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
-    <h1>Snake Game</h1>
-    <p>Select your snake color:</p>
-    <input type="color" id="colorPicker" value="#00cc00" />
-    <br>
-    <button onclick="startGame()">Play</button>
+    <div class="content-container">
+      <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
+      <h1>Snake Game</h1>
+      <div class="level-select">
+        <p>Select Level:</p>
+        <select id="levelSelect">
+          <option value="1">Level 1 (Normal)</option>
+          <option value="2">Level 2 (Fast)</option>
+          <option value="3">Level 3 (Super Fast)</option>
+        </select>
+      </div>
+      <div class="color-select">
+        <p>Select your snake color:</p>
+        <input type="color" id="colorPicker" value="#00cc00" />
+      </div>
+      <div class="high-scores">
+        <h3>High Scores</h3>
+        <div id="highScoresList"></div>
+      </div>
+      <button onclick="startGame()">Play</button>
+    </div>
   </div>
 
   <!-- GAME SCREEN -->
   <div class="screen" id="game-screen">
+    <div class="game-info">
+      <span>Level: <span id="currentLevel">1</span></span>
+      <span>Score: <span id="currentScore">0</span></span>
+    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
   </div>
 
   <!-- GAME OVER SCREEN -->
   <div class="screen" id="game-over-screen">
-    <h2>Game Over</h2>
-    <p>Your score: <span id="finalScore">0</span></p>
-    <button onclick="startGame()">Play Again</button>
-    <button onclick="goHome()">Back to Home</button>
+    <div class="content-container">
+      <h2>Game Over</h2>
+      <p>Level: <span id="finalLevel">1</span></p>
+      <p>Your score: <span id="finalScore">0</span></p>
+      <p>High score for this level: <span id="levelHighScore">0</span></p>
+      <button onclick="startGame()">Play Again</button>
+      <button onclick="goHome()">Back to Home</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
