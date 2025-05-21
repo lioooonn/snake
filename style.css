@@ -77,17 +77,24 @@ html, body {
   max-width: 80%;
   width: 400px;
   z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* Game info */
 .game-info {
   position: fixed;
   top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--container-bg);
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 18px;
   box-shadow: 0 2px 4px var(--container-shadow);
+  text-align: center;
 }
 
 .game-info span {
@@ -113,19 +120,25 @@ canvas {
 #logo {
   max-width: 200px;
   margin-bottom: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Level select and color picker */
 .level-select, .color-select {
   margin: 15px 0;
+  width: 100%;
+  text-align: center;
 }
 
 select, input[type="color"] {
   padding: 5px;
-  margin: 10px 0;
+  margin: 10px auto;
   font-size: 16px;
   border-radius: 5px;
   border: 1px solid #ccc;
+  display: block;
 }
 
 /* High scores */
@@ -134,6 +147,8 @@ select, input[type="color"] {
   padding: 15px;
   background: var(--highscore-bg);
   border-radius: 10px;
+  width: 100%;
+  text-align: center;
 }
 
 .high-scores h3 {
@@ -221,7 +236,7 @@ select, input[type="color"] {
 button {
   padding: 10px 20px;
   font-size: 16px;
-  margin: 10px;
+  margin: 10px auto;
   cursor: pointer;
   background: var(--button-bg);
   color: white;
@@ -229,6 +244,7 @@ button {
   border-radius: 5px;
   transition: all 0.3s;
   box-shadow: 0 2px 4px var(--container-shadow);
+  display: block;
 }
 
 button:hover {
@@ -311,7 +327,7 @@ button:hover {
 
 .side-container {
   position: absolute;
-  left: calc(50% + 220px); /* Half screen width + half main container + gap */
+  left: calc(50% + 300px); /* Increased spacing */
   top: 50%;
   transform: translateY(-50%);
   background: var(--container-bg);
@@ -319,4 +335,5 @@ button:hover {
   border-radius: 20px;
   box-shadow: 0 4px 6px var(--container-shadow);
   z-index: 0;
+  text-align: center;
 }

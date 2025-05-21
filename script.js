@@ -56,7 +56,7 @@ let lastProcessedDirection = null;
 let lastMoveTime = 0;
 let isWaitingAtEdge = false;
 let edgeWaitStartTime = 0;
-const EDGE_WAIT_TIME = 300; // 300ms wait at edge before game over
+const EDGE_WAIT_TIME = 150; // Reduced from 300ms to 150ms
 
 let gameSpeeds = {
   1: 130, // Normal speed (was 100)
@@ -208,32 +208,8 @@ function draw() {
     }
   }
 
-  // Draw snake with smooth corners
-  for (let i = 0; i < snake.length; i++) {
-    ctx.beginPath();
-    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
-    ctx.fillStyle = snakeColor;
-    ctx.fill();
-    
-    if (i > 0) {
-      const curr = snake[i];
-      const prev = snake[i-1];
-      ctx.fillStyle = snakeColor;
-      if (curr.x === prev.x) {
-        const y = Math.min(curr.y, prev.y);
-        ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
-      } else {
-        const x = Math.min(curr.x, prev.x);
-        ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
-      }
-    }
-  }
-
-  // Draw food as a smooth circle
-  ctx.beginPath();
-  ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
-  ctx.fillStyle = "red";
-  ctx.fill();
+  // Draw snake and food
+  drawSnakeAndFood();
   
   // Process movement queue
   if (nextDirection && isValidNextDirection(currentDirection, nextDirection)) {
@@ -272,6 +248,8 @@ function draw() {
       gameOver();
       return;
     }
+    // Don't move if we're at the edge
+    return;
   } else {
     // If we're not about to hit an edge, reset the edge waiting state
     isWaitingAtEdge = false;
@@ -301,6 +279,36 @@ function draw() {
   }
 
   snake.unshift(newHead);
+}
+
+// Helper function to draw snake and food
+function drawSnakeAndFood() {
+  // Draw snake with smooth corners
+  for (let i = 0; i < snake.length; i++) {
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
+    ctx.fillStyle = snakeColor;
+    ctx.fill();
+    
+    if (i > 0) {
+      const curr = snake[i];
+      const prev = snake[i-1];
+      ctx.fillStyle = snakeColor;
+      if (curr.x === prev.x) {
+        const y = Math.min(curr.y, prev.y);
+        ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
+      } else {
+        const x = Math.min(curr.x, prev.x);
+        ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
+      }
+    }
+  }
+
+  // Draw food as a smooth circle
+  ctx.beginPath();
+  ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
 }
 
 function collision(head, array) {
