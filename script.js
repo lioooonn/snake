@@ -18,7 +18,18 @@ let snakeColor = "#00cc00"; // Default color
 let currentLevel = 1;
 let currentMusic = musicTracks[0];
 let isMusicPlaying = true;
-let isDarkMode = false;
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+// Initialize theme from localStorage
+if (isDarkMode) {
+  document.body.setAttribute('data-theme', 'dark');
+  document.getElementById('themeToggle').innerHTML = '<span class="icon">🌜</span>';
+}
+
+// Set initial volume
+let currentVolume = localStorage.getItem('volume') || 0.5;
+document.getElementById('volumeSlider').value = currentVolume;
+musicTracks.forEach(track => track.volume = currentVolume);
 
 // Movement queue system
 let currentDirection = null;
@@ -47,21 +58,18 @@ function updateHighScoresDisplay() {
   }
 }
 
-// Theme toggle
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
-  
-  // Update snake color for better visibility in dark mode
-  snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
+// Music controls
+function updateVolume(value) {
+  currentVolume = value;
+  localStorage.setItem('volume', value);
+  musicTracks.forEach(track => track.volume = value);
 }
 
-// Music controls
 function switchMusic(index) {
   currentMusic.pause();
   currentMusic.currentTime = 0;
   currentMusic = musicTracks[index];
+  currentMusic.volume = currentVolume;
   if (isMusicPlaying) {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
@@ -75,8 +83,19 @@ function toggleMusic() {
     btn.innerHTML = '<span class="icon">🎵</span>';
   } else {
     currentMusic.pause();
-    btn.innerHTML = '<span class="icon">��</span>';
+    btn.innerHTML = '<span class="icon">🔇</span>';
   }
+}
+
+// Theme toggle
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  localStorage.setItem('darkMode', isDarkMode);
+  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '��' : '🌞'}</span>`;
+  
+  // Update snake color for better visibility in dark mode
+  snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
 }
 
 // Game initialization
@@ -92,6 +111,10 @@ function init() {
   currentDirection = null;
   nextDirection = null;
   lastProcessedDirection = null;
+  
+  // Update display
+  document.getElementById("currentLevel").textContent = currentLevel;
+  document.getElementById("currentScore").textContent = score;
 }
 
 function createFood() {
@@ -215,13 +238,13 @@ function draw() {
   // Eating food
   if (newHead.x === food.x && newHead.y === food.y) {
     score += 10;
+    document.getElementById("currentScore").textContent = score;
     createFood();
   } else {
     snake.pop();
   }
 
   snake.unshift(newHead);
-  document.getElementById("score").textContent = score;
 }
 
 function collision(head, array) {
@@ -237,7 +260,16 @@ function gameOver() {
   }
   document.getElementById("game-screen").classList.remove("active");
   document.getElementById("game-over-screen").classList.add("active");
-  document.getElementById("final-score").textContent = score;
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("finalLevel").textContent = currentLevel;
+  document.getElementById("levelHighScore").textContent = highScores[currentLevel];
+}
+
+function goHome() {
+  clearInterval(gameInterval);
+  document.getElementById("game-over-screen").classList.remove("active");
+  document.getElementById("home-screen").classList.add("active");
+  updateHighScoresDisplay();
 }
 
 function startGame() {
@@ -251,7 +283,7 @@ function startGame() {
   document.getElementById("game-screen").classList.add("active");
   
   if (isMusicPlaying) {
-    currentMusic.play();
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
   
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);

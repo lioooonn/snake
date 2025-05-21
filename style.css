@@ -10,20 +10,20 @@
   --input-border: #ccc;
   --canvas-bg: #fff;
   --canvas-pattern: #f0f0f0;
+  --highscore-bg: rgba(0, 0, 0, 0.05);
 }
 
 /* Dark theme */
 [data-theme="dark"] {
-  --bg-color: #1a1a1a;
-  --bg-pattern: #2a2a2a;
   --text-color: #fff;
   --container-bg: rgba(40, 40, 40, 0.95);
   --container-shadow: rgba(0, 0, 0, 0.3);
-  --button-bg: #2d5a30;
-  --button-hover: #1e3d20;
+  --button-bg: #4CAF50;
+  --button-hover: #45a049;
   --input-border: #444;
   --canvas-bg: #2a2a2a;
   --canvas-pattern: #333;
+  --highscore-bg: rgba(255, 255, 255, 0.1);
 }
 
 /* Reset and background */
@@ -33,15 +33,15 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: sans-serif;
-  background-color: var(--bg-color);
+  color: var(--text-color);
+  background-color: #336633;
   background-image: 
-    linear-gradient(45deg, var(--bg-pattern) 25%, transparent 25%), 
-    linear-gradient(-45deg, var(--bg-pattern) 25%, transparent 25%), 
-    linear-gradient(45deg, transparent 75%, var(--bg-pattern) 75%), 
-    linear-gradient(-45deg, transparent 75%, var(--bg-pattern) 75%);
+    linear-gradient(45deg, #3a773a 25%, transparent 25%), 
+    linear-gradient(-45deg, #3a773a 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #3a773a 75%), 
+    linear-gradient(-45deg, transparent 75%, #3a773a 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
-  color: var(--text-color);
 }
 
 /* Theme toggle */
@@ -132,7 +132,7 @@ select, input[type="color"] {
 .high-scores {
   margin: 20px 0;
   padding: 15px;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--highscore-bg);
   border-radius: 10px;
 }
 
@@ -235,4 +235,42 @@ button:hover {
   background: var(--button-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px var(--container-shadow);
+}
+
+/* Volume control */
+.volume-control {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.volume-control input[type="range"] {
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--input-border);
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
+}
+
+.volume-control input[type="range"]:hover {
+  opacity: 1;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--button-bg);
+  cursor: pointer;
+}
+
+.volume-control input[type="range"]::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--button-bg);
+  cursor: pointer;
 }
