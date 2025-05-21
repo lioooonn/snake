@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Snake Game</title>
+  <title>SNEK</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -36,11 +36,11 @@
   <div class="music-controls">
     <div class="music-select-container">
       <select id="musicSelect" onchange="switchMusic(this.value - 1)">
-        <option value="1">Track 1 - Retro Vibes</option>
-        <option value="2">Track 2 - Chill Mode</option>
-        <option value="3">Track 3 - Epic Journey</option>
-        <option value="4">Track 4 - Pixel Dreams</option>
-        <option value="5">Track 5 - Snake Jazz</option>
+        <option value="1">Track 1 - Test Track</option>
+        <option value="2">Track 2 - Empty</option>
+        <option value="3">Track 3 - Empty</option>
+        <option value="4">Track 4 - Empty</option>
+        <option value="5">Track 5 - Empty</option>
       </select>
       <div class="volume-control">
         <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
@@ -55,7 +55,7 @@
   <div class="screen active" id="home-screen">
     <div class="content-container">
       <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
-      <h1>Snake Game</h1>
+      <h1>SNEK</h1>
       <div class="level-select">
         <p>Select Level:</p>
         <select id="levelSelect">

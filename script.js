@@ -31,6 +31,11 @@ let currentVolume = localStorage.getItem('volume') || 0.5;
 document.getElementById('volumeSlider').value = currentVolume;
 musicTracks.forEach(track => track.volume = currentVolume);
 
+// Add color picker event listener
+document.getElementById('colorPicker').addEventListener('change', function(e) {
+  snakeColor = e.target.value;
+});
+
 // Movement queue system
 let currentDirection = null;
 let nextDirection = null;
@@ -43,11 +48,12 @@ let gameSpeeds = {
 };
 
 // Initialize high scores
-let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
+let highScores = {
   1: 0,
   2: 0,
   3: 0
 };
+localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
 
 // Update high scores display
 function updateHighScoresDisplay() {
@@ -163,11 +169,11 @@ function direction(event) {
 }
 
 function draw() {
-  ctx.fillStyle = "#FFFFFF";
+  ctx.fillStyle = isDarkMode ? "#1a1a1a" : "#FFFFFF";
   ctx.fillRect(0, 0, canvasSize, canvasSize);
   
   // Draw checkerboard pattern
-  ctx.fillStyle = "#F0F0F0";
+  ctx.fillStyle = isDarkMode ? "#2a2a2a" : "#F0F0F0";
   for (let i = 0; i < canvasSize/box; i++) {
     for (let j = 0; j < canvasSize/box; j++) {
       if ((i + j) % 2 === 0) {
@@ -238,7 +244,7 @@ function draw() {
 
   // Eating food
   if (newHead.x === food.x && newHead.y === food.y) {
-    score += 10;
+    score += 1;
     document.getElementById("currentScore").textContent = score;
     createFood();
   } else {
@@ -283,7 +289,9 @@ function startGame() {
   currentLevel = parseInt(document.getElementById("levelSelect").value);
   init();
   
+  // Hide all screens first
   document.getElementById("home-screen").classList.remove("active");
+  document.getElementById("game-over-screen").classList.remove("active");
   document.getElementById("game-screen").classList.add("active");
   
   if (isMusicPlaying) {
