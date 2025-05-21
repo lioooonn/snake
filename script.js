@@ -18,6 +18,7 @@ let snakeColor = "#00cc00"; // Default color
 let currentLevel = 1;
 let currentMusic = musicTracks[0];
 let isMusicPlaying = true;
+let isDarkMode = false;
 
 // Movement queue system
 let currentDirection = null;
@@ -46,22 +47,35 @@ function updateHighScoresDisplay() {
   }
 }
 
+// Theme toggle
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
+  
+  // Update snake color for better visibility in dark mode
+  snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
+}
+
 // Music controls
 function switchMusic(index) {
   currentMusic.pause();
   currentMusic.currentTime = 0;
   currentMusic = musicTracks[index];
   if (isMusicPlaying) {
-    currentMusic.play();
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
 }
 
 function toggleMusic() {
   isMusicPlaying = !isMusicPlaying;
+  const btn = document.getElementById("toggleMusic");
   if (isMusicPlaying) {
-    currentMusic.play();
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    btn.innerHTML = '<span class="icon">🎵</span>';
   } else {
     currentMusic.pause();
+    btn.innerHTML = '<span class="icon">��</span>';
   }
 }
 

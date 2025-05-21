@@ -1,3 +1,31 @@
+/* Theme variables */
+:root {
+  --bg-color: #336633;
+  --bg-pattern: #3a773a;
+  --text-color: #000;
+  --container-bg: rgba(255, 255, 255, 0.95);
+  --container-shadow: rgba(0, 0, 0, 0.1);
+  --button-bg: #4CAF50;
+  --button-hover: #45a049;
+  --input-border: #ccc;
+  --canvas-bg: #fff;
+  --canvas-pattern: #f0f0f0;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --bg-pattern: #2a2a2a;
+  --text-color: #fff;
+  --container-bg: rgba(40, 40, 40, 0.95);
+  --container-shadow: rgba(0, 0, 0, 0.3);
+  --button-bg: #2d5a30;
+  --button-hover: #1e3d20;
+  --input-border: #444;
+  --canvas-bg: #2a2a2a;
+  --canvas-pattern: #333;
+}
+
 /* Reset and background */
 html, body {
   margin: 0;
@@ -5,14 +33,23 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: sans-serif;
-  background-color: #336633;
+  background-color: var(--bg-color);
   background-image: 
-    linear-gradient(45deg, #3a773a 25%, transparent 25%), 
-    linear-gradient(-45deg, #3a773a 25%, transparent 25%), 
-    linear-gradient(45deg, transparent 75%, #3a773a 75%), 
-    linear-gradient(-45deg, transparent 75%, #3a773a 75%);
+    linear-gradient(45deg, var(--bg-pattern) 25%, transparent 25%), 
+    linear-gradient(-45deg, var(--bg-pattern) 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, var(--bg-pattern) 75%), 
+    linear-gradient(-45deg, transparent 75%, var(--bg-pattern) 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+  color: var(--text-color);
+}
+
+/* Theme toggle */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
 }
 
 /* All screen containers */
@@ -34,10 +71,10 @@ html, body {
 
 /* Content container */
 .content-container {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--container-bg);
   padding: 30px 50px;
   border-radius: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--container-shadow);
   max-width: 80%;
   width: 400px;
 }
@@ -46,11 +83,11 @@ html, body {
 .game-info {
   position: fixed;
   top: 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--container-bg);
   padding: 10px 20px;
   border-radius: 10px;
   font-size: 18px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--container-shadow);
 }
 
 .game-info span {
@@ -59,15 +96,15 @@ html, body {
 
 /* Canvas */
 canvas {
-  border: 2px solid #000;
-  background-color: #fff;
+  border: 2px solid var(--text-color);
+  background-color: var(--canvas-bg);
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--container-shadow);
   background-image: 
-    linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
-    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
-    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
-    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    linear-gradient(45deg, var(--canvas-pattern) 25%, transparent 25%), 
+    linear-gradient(-45deg, var(--canvas-pattern) 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, var(--canvas-pattern) 75%), 
+    linear-gradient(-45deg, transparent 75%, var(--canvas-pattern) 75%);
   background-size: 40px 40px;
   background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
 }
@@ -101,9 +138,9 @@ select, input[type="color"] {
 
 .high-scores h3 {
   margin-top: 0;
-  color: #4CAF50;
+  color: var(--button-bg);
   font-size: 24px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 1px 1px 2px var(--container-shadow);
 }
 
 .high-scores-grid {
@@ -114,10 +151,10 @@ select, input[type="color"] {
 }
 
 .high-scores-grid div {
-  background: #fff;
+  background: var(--container-bg);
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px var(--container-shadow);
   transition: transform 0.2s;
 }
 
@@ -130,32 +167,50 @@ select, input[type="color"] {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  display: flex;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  z-index: 1000;
+}
+
+.music-select-container {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  background: var(--container-bg);
   padding: 10px;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  box-shadow: 0 2px 4px var(--container-shadow);
+}
+
+.music-controls:hover .music-select-container {
+  opacity: 1;
+  visibility: visible;
 }
 
 #musicSelect {
   padding: 5px 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border);
+  background: var(--container-bg);
+  color: var(--text-color);
 }
 
-#toggleMusic {
-  padding: 5px 10px;
+#toggleMusic, #themeToggle {
+  padding: 8px 12px;
   margin: 0;
-  background: none;
-  border: 1px solid #ccc;
+  background: var(--container-bg);
+  border: 1px solid var(--input-border);
   cursor: pointer;
   border-radius: 5px;
+  box-shadow: 0 2px 4px var(--container-shadow);
+  transition: all 0.3s ease;
 }
 
-#toggleMusic:hover {
-  background: #f0f0f0;
+#toggleMusic:hover, #themeToggle:hover {
+  background: var(--button-hover);
+  transform: translateY(-2px);
 }
 
 .icon {
@@ -168,16 +223,16 @@ button {
   font-size: 16px;
   margin: 10px;
   cursor: pointer;
-  background: #4CAF50;
+  background: var(--button-bg);
   color: white;
   border: none;
   border-radius: 5px;
   transition: all 0.3s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--container-shadow);
 }
 
 button:hover {
-  background: #45a049;
+  background: var(--button-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px var(--container-shadow);
 }

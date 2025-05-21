@@ -8,6 +8,13 @@
 </head>
 
 <body>
+  <!-- Theme toggle -->
+  <div class="theme-toggle">
+    <button id="themeToggle" onclick="toggleTheme()">
+      <span class="icon">🌞</span>
+    </button>
+  </div>
+
   <!-- Audio elements -->
   <audio id="gameMusic" loop>
     <source src="music/track1.mp3" type="audio/mp3">
@@ -25,17 +32,19 @@
     <source src="music/track5.mp3" type="audio/mp3">
   </audio>
 
-  <!-- Music selector -->
+  <!-- Music controls -->
   <div class="music-controls">
-    <select id="musicSelect" onchange="changeMusic()">
-      <option value="1">Track 1 - Retro Vibes</option>
-      <option value="2">Track 2 - Chill Mode</option>
-      <option value="3">Track 3 - Epic Journey</option>
-      <option value="4">Track 4 - Pixel Dreams</option>
-      <option value="5">Track 5 - Snake Jazz</option>
-    </select>
+    <div class="music-select-container">
+      <select id="musicSelect" onchange="switchMusic(this.value - 1)">
+        <option value="1">Track 1 - Retro Vibes</option>
+        <option value="2">Track 2 - Chill Mode</option>
+        <option value="3">Track 3 - Epic Journey</option>
+        <option value="4">Track 4 - Pixel Dreams</option>
+        <option value="5">Track 5 - Snake Jazz</option>
+      </select>
+    </div>
     <button id="toggleMusic" onclick="toggleMusic()">
-      <span class="icon">🔊</span>
+      <span class="icon">🎵</span>
     </button>
   </div>
 
