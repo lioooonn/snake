@@ -38,11 +38,10 @@ let currentVolume = localStorage.getItem('volume') || 0.5;
 document.getElementById('volumeSlider').value = currentVolume;
 musicTracks.forEach(track => track.volume = currentVolume);
 
-// Start playing music when document is ready
-document.addEventListener('DOMContentLoaded', function() {
-  if (isMusicPlaying) {
-    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-  }
+// Start playing music immediately when window loads
+window.addEventListener('load', function() {
+  currentMusic.volume = currentVolume;
+  currentMusic.play().catch(e => console.log("Audio playback failed:", e));
 });
 
 // Add color picker event listener
@@ -55,11 +54,14 @@ let currentDirection = null;
 let nextDirection = null;
 let lastProcessedDirection = null;
 let lastMoveTime = 0;
+let isWaitingAtEdge = false;
+let edgeWaitStartTime = 0;
+const EDGE_WAIT_TIME = 300; // 300ms wait at edge before game over
 
 let gameSpeeds = {
-  1: 100, // Normal speed (was 150)
-  2: 70,  // Fast (was 100)
-  3: 50   // Super fast (was 70)
+  1: 130, // Normal speed (was 100)
+  2: 100, // Fast (was 70)
+  3: 80   // Super fast (was 50)
 };
 
 // Update high scores display
@@ -169,8 +171,8 @@ function direction(event) {
   
   event.preventDefault();
   
-  // Immediate direction change if valid
-  if (isValidNextDirection(currentDirection, key)) {
+  // Prevent 180-degree turns by checking both current and next direction
+  if (isValidNextDirection(currentDirection, key) && !isOppositeDirection(lastProcessedDirection, key)) {
     nextDirection = key;
     // If enough time has passed since last move, apply immediately
     const now = Date.now();
@@ -178,6 +180,16 @@ function direction(event) {
       currentDirection = nextDirection;
     }
   }
+}
+
+function isOppositeDirection(dir1, dir2) {
+  if (!dir1 || !dir2) return false;
+  return (
+    (dir1 === 'ArrowUp' && dir2 === 'ArrowDown') ||
+    (dir1 === 'ArrowDown' && dir2 === 'ArrowUp') ||
+    (dir1 === 'ArrowLeft' && dir2 === 'ArrowRight') ||
+    (dir1 === 'ArrowRight' && dir2 === 'ArrowLeft')
+  );
 }
 
 function draw() {
@@ -232,27 +244,39 @@ function draw() {
   // Move snake
   switch(currentDirection) {
     case "ArrowLeft":
-      newHead.x -= box;
+      newHead.x = Math.max(0, newHead.x - box);
       break;
     case "ArrowUp":
-      newHead.y -= box;
+      newHead.y = Math.max(0, newHead.y - box);
       break;
     case "ArrowRight":
-      newHead.x += box;
+      newHead.x = Math.min(canvasSize - box, newHead.x + box);
       break;
     case "ArrowDown":
-      newHead.y += box;
+      newHead.y = Math.min(canvasSize - box, newHead.y + box);
       break;
   }
 
+  // Check if snake is at edge
+  const isAtEdge = newHead.x === 0 || newHead.x === canvasSize - box ||
+                   newHead.y === 0 || newHead.y === canvasSize - box;
+
+  if (isAtEdge && !isWaitingAtEdge) {
+    isWaitingAtEdge = true;
+    edgeWaitStartTime = Date.now();
+  }
+
   // Game over conditions
-  if (newHead.x < -box/2 || newHead.x >= canvasSize + box/2 ||
-      newHead.y < -box/2 || newHead.y >= canvasSize + box/2 ||
+  if ((isWaitingAtEdge && Date.now() - edgeWaitStartTime > EDGE_WAIT_TIME) ||
       collision(newHead, snake)) {
     clearInterval(gameInterval);
     gameOver();
     return;
   }
+
+  // Update lastProcessedDirection after successful move
+  lastProcessedDirection = currentDirection;
+  lastMoveTime = Date.now();
 
   // Eating food
   if (newHead.x === food.x && newHead.y === food.y) {

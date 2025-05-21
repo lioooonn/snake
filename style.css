@@ -289,17 +289,29 @@ button:hover {
 }
 
 #side-graphic {
-  max-width: 150px;
+  max-width: 250px;
   height: auto;
 }
 
 #game-over-graphic {
   max-width: 200px;
-  margin-bottom: 20px;
+  margin: 20px 0 30px;
   animation: bounce 1s ease infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
+}
+
+.side-container {
+  position: absolute;
+  right: -300px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--container-bg);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px var(--container-shadow);
 }
