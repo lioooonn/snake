@@ -118,9 +118,9 @@ canvas {
 
 /* Logo */
 #logo {
-  max-width: 200px;
-  margin: 0 auto 20px;
-  display: block;
+  width: 200px;
+  height: auto;
+  margin-bottom: 20px;
 }
 
 /* Level select and color picker */
