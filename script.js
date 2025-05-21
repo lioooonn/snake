@@ -1,4 +1,4 @@
-const VERSION = "1.0.0"; // Easy to update version number
+const VERSION = "PRE-ALPHA v0.0.42";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
