@@ -1,3 +1,5 @@
+const VERSION = "1.0.0"; // Easy to update version number
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -42,6 +44,7 @@ musicTracks.forEach(track => track.volume = currentVolume);
 window.addEventListener('load', function() {
   currentMusic.volume = currentVolume;
   currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+  document.getElementById('version-display').textContent = `v${VERSION}`;
 });
 
 // Add color picker event listener
@@ -95,7 +98,7 @@ function toggleMusic() {
   const btn = document.getElementById("toggleMusic");
   if (isMusicPlaying) {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-    btn.innerHTML = '<span class="icon">🎵</span>';
+    btn.innerHTML = '<span class="icon">🔊</span>';
   } else {
     currentMusic.pause();
     btn.innerHTML = '<span class="icon">🔇</span>';
