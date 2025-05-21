@@ -56,7 +56,7 @@ let lastProcessedDirection = null;
 let lastMoveTime = 0;
 let isWaitingAtEdge = false;
 let edgeWaitStartTime = 0;
-const EDGE_WAIT_TIME = 150; // Reduced from 300ms to 150ms
+const EDGE_WAIT_TIME = 100; // Reduced from 150ms to 100ms
 
 let gameSpeeds = {
   1: 130, // Normal speed (was 100)
