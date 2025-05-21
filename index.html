@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SNEK</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="snake-logo.png">
 </head>
 
 <body>
@@ -54,7 +55,10 @@
   <!-- HOME SCREEN -->
   <div class="screen active" id="home-screen">
     <div class="content-container">
-      <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
+      <div class="title-container">
+        <img id="logo" src="snake-logo.png" alt="Snake Game Logo" />
+        <img id="side-graphic" src="side-graphic.png" alt="Decorative Snake Graphic" />
+      </div>
       <h1>SNEK</h1>
       <div class="level-select">
         <p>Select Level:</p>
@@ -88,6 +92,7 @@
   <!-- GAME OVER SCREEN -->
   <div class="screen" id="game-over-screen">
     <div class="content-container">
+      <img id="game-over-graphic" src="game-over-graphic.png" alt="Game Over Graphic" />
       <h2>Game Over</h2>
       <p>Level: <span id="finalLevel">1</span></p>
       <p>Your score: <span id="finalScore">0</span></p>

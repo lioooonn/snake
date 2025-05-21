@@ -274,3 +274,32 @@ button:hover {
   background: var(--button-bg);
   cursor: pointer;
 }
+
+.title-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+#logo {
+  max-width: 150px;
+  margin-right: 20px;
+}
+
+#side-graphic {
+  max-width: 150px;
+  height: auto;
+}
+
+#game-over-graphic {
+  max-width: 200px;
+  margin-bottom: 20px;
+  animation: bounce 1s ease infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}

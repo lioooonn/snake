@@ -26,10 +26,24 @@ if (isDarkMode) {
   document.getElementById('themeToggle').innerHTML = '<span class="icon">🌜</span>';
 }
 
-// Set initial volume
+// Initialize high scores
+let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
+  1: 0,
+  2: 0,
+  3: 0
+};
+
+// Set initial volume and start music
 let currentVolume = localStorage.getItem('volume') || 0.5;
 document.getElementById('volumeSlider').value = currentVolume;
 musicTracks.forEach(track => track.volume = currentVolume);
+
+// Start playing music when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+  if (isMusicPlaying) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+  }
+});
 
 // Add color picker event listener
 document.getElementById('colorPicker').addEventListener('change', function(e) {
@@ -40,20 +54,13 @@ document.getElementById('colorPicker').addEventListener('change', function(e) {
 let currentDirection = null;
 let nextDirection = null;
 let lastProcessedDirection = null;
+let lastMoveTime = 0;
 
 let gameSpeeds = {
-  1: 150, // Normal speed
-  2: 100, // Fast
-  3: 70   // Super fast
+  1: 100, // Normal speed (was 150)
+  2: 70,  // Fast (was 100)
+  3: 50   // Super fast (was 70)
 };
-
-// Initialize high scores
-let highScores = {
-  1: 0,
-  2: 0,
-  3: 0
-};
-localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
 
 // Update high scores display
 function updateHighScoresDisplay() {
@@ -162,9 +169,14 @@ function direction(event) {
   
   event.preventDefault();
   
-  // Only update nextDirection if it's a valid move
+  // Immediate direction change if valid
   if (isValidNextDirection(currentDirection, key)) {
     nextDirection = key;
+    // If enough time has passed since last move, apply immediately
+    const now = Date.now();
+    if (now - lastMoveTime >= gameSpeeds[currentLevel] * 0.5) {
+      currentDirection = nextDirection;
+    }
   }
 }
 
@@ -234,8 +246,8 @@ function draw() {
   }
 
   // Game over conditions
-  if (newHead.x < 0 || newHead.x >= canvasSize ||
-      newHead.y < 0 || newHead.y >= canvasSize ||
+  if (newHead.x < -box/2 || newHead.x >= canvasSize + box/2 ||
+      newHead.y < -box/2 || newHead.y >= canvasSize + box/2 ||
       collision(newHead, snake)) {
     clearInterval(gameInterval);
     gameOver();
