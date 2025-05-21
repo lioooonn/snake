@@ -48,7 +48,7 @@
       </div>
     </div>
     <button id="toggleMusic" onclick="toggleMusic()">
-      <span class="icon">🎵</span>
+      <span class="icon">🔊</span>
     </button>
   </div>
 
@@ -66,7 +66,7 @@
         </select>
       </div>
       <div class="color-select">
-        <p>Select your snake color:</p>
+        <p>Select SNEK Color:</p>
         <input type="color" id="colorPicker" value="#00cc00" />
       </div>
       <div class="high-scores">
@@ -93,10 +93,10 @@
   <div class="screen" id="game-over-screen">
     <div class="content-container">
       <img id="game-over-graphic" src="game-over-graphic.png" alt="Game Over Graphic" />
-      <h2>Game Over</h2>
+      <h2>Play Again?</h2>
       <p>Level: <span id="finalLevel">1</span></p>
-      <p>Your score: <span id="finalScore">0</span></p>
-      <p>High score for this level: <span id="levelHighScore">0</span></p>
+      <p>Score: <span id="finalScore">0</span></p>
+      <p>High Score: <span id="levelHighScore">0</span></p>
       <button onclick="startGame()">Play Again</button>
       <button onclick="goHome()">Back to Home</button>
     </div>
