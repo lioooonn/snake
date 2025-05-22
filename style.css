@@ -195,6 +195,8 @@ select, input[type="color"] {
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 2px 4px var(--container-shadow);
+  min-width: 200px;
+  white-space: nowrap;
 }
 
 .music-preview {
@@ -204,6 +206,8 @@ select, input[type="color"] {
   font-size: 14px;
   color: var(--text-color);
   border-bottom: 1px solid var(--input-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .music-select-group {
@@ -211,10 +215,12 @@ select, input[type="color"] {
   flex-direction: column;
   gap: 5px;
   margin-bottom: 10px;
+  width: 100%;
 }
 
 .music-select-group select {
   width: 100%;
+  min-width: fit-content;
 }
 
 #musicSelect, #musicSelect2 {
@@ -223,6 +229,13 @@ select, input[type="color"] {
   border: 1px solid var(--input-border);
   background: var(--container-bg);
   color: var(--text-color);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#musicSelect option, #musicSelect2 option {
+  padding: 5px;
+  white-space: nowrap;
 }
 
 .music-controls:hover .music-select-container {
@@ -273,8 +286,8 @@ button:hover {
 
 /* Volume control */
 .volume-control {
-  margin-top: 10px;
   width: 100%;
+  margin-top: 10px;
 }
 
 .volume-control input[type="range"] {
