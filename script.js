@@ -64,7 +64,7 @@ let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
   3: 0
 };
 
-// Initialize global high scores
+// Initialize global high scores with default values
 let globalHighScores = {
   1: { score: 0, player: 'None' },
   2: { score: 0, player: 'None' },
@@ -115,21 +115,30 @@ let gameSpeeds = {
 
 // Update high scores display
 function updateHighScoresDisplay() {
-  // Update local high scores
   const highScoresList = document.getElementById('highScoresList');
-  if (!highScoresList) return;
-  
-  highScoresList.innerHTML = '';
-  Object.entries(highScores).forEach(([level, score]) => {
-    highScoresList.innerHTML += `
-      <div class="high-score-entry">
-        <span>Level ${level}</span>
-        <span>${score}</span>
-      </div>`;
-  });
-  
-  // Update global high scores
-  updateGlobalHighScoresDisplay();
+  if (highScoresList) {
+    highScoresList.innerHTML = '';
+    for (let level = 1; level <= 3; level++) {
+      highScoresList.innerHTML += `
+        <div class="high-score-entry">
+          <span>Level ${level}</span>
+          <span>${highScores[level]}</span>
+        </div>`;
+    }
+  }
+
+  const globalHighScoresList = document.getElementById('globalHighScoresList');
+  if (globalHighScoresList) {
+    globalHighScoresList.innerHTML = '';
+    for (let level = 1; level <= 3; level++) {
+      const data = globalHighScores[level] || { score: 0, player: 'None' };
+      globalHighScoresList.innerHTML += `
+        <div class="global-score-entry">
+          <span>Level ${level}</span>
+          <span><span class="player-name">${data.player}</span>: ${data.score}</span>
+        </div>`;
+    }
+  }
 }
 
 function updateGlobalHighScoresDisplay() {
@@ -202,19 +211,27 @@ function toggleTheme() {
 
 // Game initialization
 function init() {
-  snake = [];
-  snake[0] = {
+  // Clear any existing game interval
+  if (gameInterval) {
+    clearInterval(gameInterval);
+  }
+  
+  // Initialize snake
+  snake = [{
     x: Math.floor(canvasSize/(2*box)) * box,
     y: Math.floor(canvasSize/(2*box)) * box
-  };
+  }];
   
-  createFood();
+  // Reset game state
   score = 0;
   currentDirection = "ArrowRight";
   nextDirection = "ArrowRight";
   lastProcessedDirection = null;
   isWaitingAtEdge = false;
   edgeWaitStartTime = 0;
+  
+  // Create initial food
+  createFood();
   
   // Update display
   document.getElementById("currentLevel").textContent = currentLevel;
@@ -399,13 +416,15 @@ function startGame() {
     return;
   }
   
-  isPlaying = true;
+  // Get selected level
   currentLevel = parseInt(document.getElementById("levelSelect").value);
+  console.log("Selected level:", currentLevel); // Debug log
   
-  // Initialize game state
+  // Initialize game
   init();
+  isPlaying = true;
   
-  // Hide all screens and show game screen
+  // Switch screens
   hideAllScreens();
   document.getElementById("game-screen").classList.add("active");
   
@@ -414,10 +433,8 @@ function startGame() {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
   
-  // Remove any existing event listeners
+  // Set up keyboard controls
   document.removeEventListener("keydown", direction);
-  
-  // Add keyboard controls
   document.addEventListener("keydown", direction);
   
   // Start game loop
@@ -425,15 +442,21 @@ function startGame() {
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
 }
 
-// Ensure play button is properly connected
+// Set up play button event listener
 document.addEventListener('DOMContentLoaded', function() {
-  const playButton = document.querySelector('.play-button');
+  console.log("Setting up play button listener"); // Debug log
+  const playButton = document.getElementById('playButton');
   if (playButton) {
-    playButton.addEventListener('click', function() {
+    playButton.onclick = function() {
       console.log("Play button clicked"); // Debug log
       startGame();
-    });
+    };
+  } else {
+    console.error("Play button not found!"); // Debug log
   }
+  
+  // Initialize displays
+  updateHighScoresDisplay();
 });
 
 function gameOver() {
