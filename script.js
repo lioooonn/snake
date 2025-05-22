@@ -1,4 +1,4 @@
-const VERSION = "0.0.54 (PRE-ALPHA)";
+const VERSION = "0.0.55 (PRE-ALPHA)";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -42,6 +42,29 @@ let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
   3: 0
 };
 
+// Initialize global high scores
+let globalHighScores = {
+  1: { score: 0, player: 'None' },
+  2: { score: 0, player: 'None' },
+  3: { score: 0, player: 'None' }
+};
+
+// Player name handling
+let playerName = localStorage.getItem('playerName') || '';
+if (!playerName) {
+  playerName = prompt('Enter your name for the global leaderboard:') || 'Anonymous';
+  localStorage.setItem('playerName', playerName);
+}
+
+// Listen for global high score updates
+globalHighScoresRef.on('value', (snapshot) => {
+  const scores = snapshot.val();
+  if (scores) {
+    globalHighScores = scores;
+    updateGlobalHighScoresDisplay();
+  }
+});
+
 // Set initial volume and start music
 let currentVolume = localStorage.getItem('volume') || 0.5;
 document.getElementById('volumeSlider').value = currentVolume;
@@ -52,6 +75,7 @@ window.addEventListener('load', function() {
   currentMusic.volume = currentVolume;
   currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   document.getElementById('version-display').textContent = `v${VERSION}`;
+  updateHighScoresDisplay();
 });
 
 // Add color picker event listener
@@ -76,10 +100,27 @@ let gameSpeeds = {
 
 // Update high scores display
 function updateHighScoresDisplay() {
+  // Update local high scores
   const highScoresList = document.getElementById('highScoresList');
   highScoresList.innerHTML = '';
   for (let level in highScores) {
     highScoresList.innerHTML += `<div>Level ${level}: ${highScores[level]}</div>`;
+  }
+  
+  // Update global high scores
+  updateGlobalHighScoresDisplay();
+}
+
+function updateGlobalHighScoresDisplay() {
+  const globalHighScoresList = document.getElementById('globalHighScoresList');
+  globalHighScoresList.innerHTML = '';
+  for (let level in globalHighScores) {
+    const scoreData = globalHighScores[level];
+    globalHighScoresList.innerHTML += `
+      <div class="global-score-entry">
+        <span>Level ${level}</span>
+        <span><span class="player-name">${scoreData.player}</span>: ${scoreData.score}</span>
+      </div>`;
   }
 }
 
@@ -367,11 +408,23 @@ function startGame() {
 
 function gameOver() {
   isPlaying = false;
+  
+  // Check and update local high score
   if (score > highScores[currentLevel]) {
     highScores[currentLevel] = score;
     localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-    updateHighScoresDisplay();
+    
+    // Check and update global high score
+    if (!globalHighScores[currentLevel] || score > globalHighScores[currentLevel].score) {
+      globalHighScoresRef.child(currentLevel).set({
+        score: score,
+        player: playerName,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
   }
+  
+  updateHighScoresDisplay();
   hideAllScreens();
   document.getElementById("game-over-screen").classList.add("active");
   document.getElementById("finalScore").textContent = score;
@@ -385,6 +438,3 @@ function goHome() {
   document.getElementById("home-screen").classList.add("active");
   updateHighScoresDisplay();
 }
-
-// Initialize high scores display
-updateHighScoresDisplay();

@@ -6,6 +6,10 @@
   <title>SNEK</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="snake-logo.png">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
@@ -103,8 +107,16 @@
         <input type="color" id="colorPicker" value="#00cc00" />
       </div>
       <div class="high-scores">
-        <h3>🏆 High Scores 🏆</h3>
-        <div class="high-scores-grid" id="highScoresList"></div>
+        <div class="scores-container">
+          <div class="local-scores">
+            <h3>🏆 Local High Scores 🏆</h3>
+            <div class="high-scores-grid" id="highScoresList"></div>
+          </div>
+          <div class="global-scores">
+            <h3>🌎 Global High Scores 🌎</h3>
+            <div class="high-scores-grid" id="globalHighScoresList"></div>
+          </div>
+        </div>
       </div>
       <button onclick="startGame()">Play</button>
     </div>
