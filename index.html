@@ -34,6 +34,7 @@
   <audio id="gameMusic4" loop>
     <source src="music/track4.mp3" type="audio/mp3">
   </audio>
+  <!-- Temporarily disabled until music files are available
   <audio id="gameMusic5" loop>
     <source src="music/track5.mp3" type="audio/mp3">
   </audio>
@@ -58,6 +59,7 @@
   <audio id="gameMusic12" loop>
     <source src="music/track12.mp3" type="audio/mp3">
   </audio>
+  -->
 
   <!-- Music controls -->
   <div class="music-controls">
@@ -69,17 +71,21 @@
           <option value="2">(01) Snek's Theme</option>
           <option value="3">(02) Puzzle Garden</option>
           <option value="4">(03) Tall Grass</option>
+          <!-- Temporarily disabled until music files are available
           <option value="5">(04) Empty</option>
           <option value="6">(05) Cherry Picking</option>
           <option value="7">(06) Empty</option>
           <option value="8">(07) Empty</option>
+          -->
         </select>
+        <!-- Temporarily disabled until music files are available
         <select id="musicSelect2" onchange="switchMusic(parseInt(this.value) + 7)">
           <option value="1">(08) Steak or Snake</option>
           <option value="2">(09) Snakesolation</option>
           <option value="3">(10) FangRX</option>
           <option value="4">(11) Empty</option>
         </select>
+        -->
       </div>
       <div class="volume-control">
         <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
