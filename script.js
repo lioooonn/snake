@@ -1,7 +1,18 @@
-const VERSION = "0.0.55 (PRE-ALPHA)";
+const VERSION = "0.0.56 (PRE-ALPHA)";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+
+// Random name generation
+const adjectives = ['Swift', 'Sneaky', 'Slithery', 'Speedy', 'Smooth', 'Silent', 'Stealthy', 'Skilled'];
+const nouns = ['Snake', 'Serpent', 'Viper', 'Python', 'Cobra', 'Mamba', 'Asp', 'Boa'];
+
+function generateRandomName() {
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const number = Math.floor(Math.random() * 1000);
+  return `${adj}${noun}${number}`;
+}
 
 // Get all music elements
 const musicTracks = [
@@ -49,11 +60,19 @@ let globalHighScores = {
   3: { score: 0, player: 'None' }
 };
 
-// Player name handling
-let playerName = localStorage.getItem('playerName') || '';
+// Generate and store random player name if not exists
+let playerName = localStorage.getItem('playerName');
 if (!playerName) {
-  playerName = prompt('Enter your name for the global leaderboard:') || 'Anonymous';
+  playerName = generateRandomName();
   localStorage.setItem('playerName', playerName);
+}
+
+// Update player name display
+function updatePlayerNameDisplay() {
+  const display = document.getElementById('playerNameDisplay');
+  if (display) {
+    display.textContent = playerName;
+  }
 }
 
 // Listen for global high score updates
@@ -74,8 +93,9 @@ musicTracks.forEach(track => track.volume = currentVolume);
 window.addEventListener('load', function() {
   currentMusic.volume = currentVolume;
   currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-  document.getElementById('version-display').textContent = `v${VERSION}`;
+  document.getElementById('version-display').textContent = VERSION;
   updateHighScoresDisplay();
+  updatePlayerNameDisplay();
 });
 
 // Add color picker event listener
@@ -102,9 +122,15 @@ let gameSpeeds = {
 function updateHighScoresDisplay() {
   // Update local high scores
   const highScoresList = document.getElementById('highScoresList');
+  if (!highScoresList) return; // Guard against null element
+  
   highScoresList.innerHTML = '';
   for (let level in highScores) {
-    highScoresList.innerHTML += `<div>Level ${level}: ${highScores[level]}</div>`;
+    highScoresList.innerHTML += `
+      <div class="high-score-entry">
+        <span>Level ${level}</span>
+        <span>${highScores[level]}</span>
+      </div>`;
   }
   
   // Update global high scores
@@ -113,6 +139,8 @@ function updateHighScoresDisplay() {
 
 function updateGlobalHighScoresDisplay() {
   const globalHighScoresList = document.getElementById('globalHighScoresList');
+  if (!globalHighScoresList) return; // Guard against null element
+  
   globalHighScoresList.innerHTML = '';
   for (let level in globalHighScores) {
     const scoreData = globalHighScores[level];
@@ -437,4 +465,11 @@ function goHome() {
   hideAllScreens();
   document.getElementById("home-screen").classList.add("active");
   updateHighScoresDisplay();
+}
+
+// Add function to generate new random name
+function regeneratePlayerName() {
+  playerName = generateRandomName();
+  localStorage.setItem('playerName', playerName);
+  updatePlayerNameDisplay();
 }

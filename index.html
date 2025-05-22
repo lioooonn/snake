@@ -20,6 +20,11 @@
     </button>
   </div>
 
+  <!-- Player name display -->
+  <div class="player-name-display">
+    Playing as: <span id="playerNameDisplay"></span>
+  </div>
+
   <!-- Audio elements -->
   <audio id="gameMusic" loop>
     <source src="music/track1.mp3" type="audio/mp3">
@@ -118,7 +123,7 @@
           </div>
         </div>
       </div>
-      <button onclick="startGame()">Play</button>
+      <button onclick="startGame()" class="play-button">Play Game</button>
     </div>
     <div class="side-container">
       <img id="side-graphic" src="side-graphic.png" alt="Decorative Snake Graphic" />

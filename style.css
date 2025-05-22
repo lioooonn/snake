@@ -178,25 +178,29 @@ select, input[type="color"] {
   margin: 15px 0;
 }
 
-.high-scores-grid div {
-  background: var(--highscore-bg);
-  padding: 8px;
-  border-radius: 6px;
-  transition: transform 0.2s;
+.high-score-entry,
+.global-score-entry {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px;
+  margin: 4px 0;
+  background: var(--highscore-bg);
+  border-radius: 6px;
+  transition: transform 0.2s;
 }
 
-.high-scores-grid div:hover {
+.high-score-entry:hover,
+.global-score-entry:hover {
   transform: scale(1.02);
 }
 
-.global-score-entry {
+.high-score-entry span,
+.global-score-entry span {
   font-size: 14px;
 }
 
-.global-score-entry .player-name {
+.player-name {
   font-weight: bold;
   color: var(--button-bg);
 }
@@ -402,4 +406,50 @@ button:hover {
   font-size: 12px;
   color: var(--text-color);
   opacity: 0.7;
+  z-index: 1000;
+  background: var(--container-bg);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.play-button {
+  background: var(--button-bg);
+  color: white;
+  padding: 15px 30px;
+  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  box-shadow: 0 4px 6px var(--container-shadow);
+}
+
+.play-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px var(--container-shadow);
+  background: var(--button-hover);
+}
+
+.play-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px var(--container-shadow);
+}
+
+.player-name-display {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--container-bg);
+  padding: 8px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--container-shadow);
+  font-size: 14px;
+  color: var(--text-color);
+  z-index: 1000;
+}
+
+.player-name-display span {
+  font-weight: bold;
+  color: var(--button-bg);
 }
