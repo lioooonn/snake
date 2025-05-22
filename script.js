@@ -71,14 +71,33 @@ let globalHighScores = {
   3: { score: 0, player: 'None' }
 };
 
-// Listen for global high score updates
-globalHighScoresRef.on('value', (snapshot) => {
-  const scores = snapshot.val();
-  if (scores) {
-    globalHighScores = scores;
-    updateGlobalHighScoresDisplay();
+// Firebase initialization and global high scores setup
+let globalHighScoresRef = null;
+try {
+  if (typeof firebase !== 'undefined' && firebase.database) {
+    globalHighScoresRef = firebase.database().ref('globalHighScores');
+    globalHighScoresRef.on('value', (snapshot) => {
+      const scores = snapshot.val();
+      if (scores) {
+        globalHighScores = scores;
+        updateHighScoresDisplay();
+      }
+    });
   }
-});
+} catch (error) {
+  console.log('Firebase not initialized or unavailable:', error);
+}
+
+// Function to update global high score
+function updateGlobalHighScore(level, score) {
+  if (globalHighScoresRef && (!globalHighScores[level] || score > globalHighScores[level].score)) {
+    globalHighScoresRef.child(level).set({
+      score: score,
+      player: playerName,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).catch(error => console.log('Error updating global high score:', error));
+  }
+}
 
 // Set initial volume and start music
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -462,22 +481,28 @@ document.addEventListener('DOMContentLoaded', function() {
 function gameOver() {
   isPlaying = false;
   
+  // Clear the game interval
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  
+  // Remove keyboard listener
+  document.removeEventListener("keydown", direction);
+  
   // Check and update local high score
   if (score > highScores[currentLevel]) {
     highScores[currentLevel] = score;
     localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
     
-    // Check and update global high score
-    if (!globalHighScores[currentLevel] || score > globalHighScores[currentLevel].score) {
-      globalHighScoresRef.child(currentLevel).set({
-        score: score,
-        player: playerName,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      });
-    }
+    // Try to update global high score
+    updateGlobalHighScore(currentLevel, score);
   }
   
+  // Update displays
   updateHighScoresDisplay();
+  
+  // Switch to game over screen
   hideAllScreens();
   document.getElementById("game-over-screen").classList.add("active");
   document.getElementById("finalScore").textContent = score;
