@@ -17,14 +17,16 @@ try {
   const database = firebase.database();
   const globalHighScoresRef = database.ref('globalHighScores');
 
-  // Test database connection
-  globalHighScoresRef.once('value')
-    .then(() => {
-      console.log('Firebase connection successful');
-    })
-    .catch(error => {
-      console.error('Firebase connection error:', error);
-    });
+  // Set up real-time listener for high scores
+  globalHighScoresRef.on('value', (snapshot) => {
+    console.log('Received new high scores:', snapshot.val());
+    window.dispatchEvent(new CustomEvent('globalHighScoresUpdated', {
+      detail: snapshot.val()
+    }));
+  });
+
+  // Export for use in other files
+  window.globalHighScoresRef = globalHighScoresRef;
 
 } catch (error) {
   console.error('Firebase initialization error:', error);

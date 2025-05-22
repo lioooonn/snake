@@ -88,14 +88,38 @@ try {
   console.log('Firebase not initialized or unavailable:', error);
 }
 
+// Listen for global high score updates
+window.addEventListener('globalHighScoresUpdated', (event) => {
+  console.log('Updating global high scores:', event.detail);
+  if (event.detail) {
+    globalHighScores = event.detail;
+    updateHighScoresDisplay();
+  }
+});
+
 // Function to update global high score
-function updateGlobalHighScore(level, score) {
-  if (globalHighScoresRef && (!globalHighScores[level] || score > globalHighScores[level].score)) {
-    globalHighScoresRef.child(level).set({
-      score: score,
-      player: playerName,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).catch(error => console.log('Error updating global high score:', error));
+async function updateGlobalHighScore(level, score) {
+  try {
+    if (!globalHighScoresRef) return;
+
+    const currentHighScore = globalHighScores[level]?.score || 0;
+    if (score > currentHighScore) {
+      console.log(`New global high score for level ${level}: ${score}`);
+      await globalHighScoresRef.child(level).set({
+        score: score,
+        player: playerName,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+      
+      // Update local copy immediately
+      globalHighScores[level] = {
+        score: score,
+        player: playerName
+      };
+      updateHighScoresDisplay();
+    }
+  } catch (error) {
+    console.error('Error updating global high score:', error);
   }
 }
 
@@ -134,6 +158,10 @@ let gameSpeeds = {
 
 // Update high scores display
 function updateHighScoresDisplay() {
+  console.log('Updating high scores display');
+  console.log('Local scores:', highScores);
+  console.log('Global scores:', globalHighScores);
+
   const highScoresList = document.getElementById('highScoresList');
   if (highScoresList) {
     highScoresList.innerHTML = '';
@@ -461,21 +489,21 @@ function startGame() {
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
 }
 
-// Set up play button event listener
+// Initialize displays when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  console.log("Setting up play button listener"); // Debug log
+  // Initial high scores display
+  updateHighScoresDisplay();
+  
+  // Set up play button
   const playButton = document.getElementById('playButton');
   if (playButton) {
     playButton.onclick = function() {
-      console.log("Play button clicked"); // Debug log
+      console.log("Play button clicked");
       startGame();
     };
   } else {
-    console.error("Play button not found!"); // Debug log
+    console.error("Play button not found!");
   }
-  
-  // Initialize displays
-  updateHighScoresDisplay();
 });
 
 function gameOver() {
