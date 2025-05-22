@@ -3,6 +3,9 @@ const VERSION = "0.0.56 (PRE-ALPHA)";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// Initialize displays immediately
+document.getElementById('version-display').textContent = VERSION;
+
 // Random name generation
 const adjectives = ['Swift', 'Sneaky', 'Slithery', 'Speedy', 'Smooth', 'Silent', 'Stealthy', 'Skilled'];
 const nouns = ['Snake', 'Serpent', 'Viper', 'Python', 'Cobra', 'Mamba', 'Asp', 'Boa'];
@@ -13,6 +16,14 @@ function generateRandomName() {
   const number = Math.floor(Math.random() * 1000);
   return `${adj}${noun}${number}`;
 }
+
+// Initialize player name immediately
+let playerName = localStorage.getItem('playerName');
+if (!playerName) {
+  playerName = generateRandomName();
+  localStorage.setItem('playerName', playerName);
+}
+document.getElementById('playerNameDisplay').textContent = playerName;
 
 // Get all music elements
 const musicTracks = [
@@ -60,21 +71,6 @@ let globalHighScores = {
   3: { score: 0, player: 'None' }
 };
 
-// Generate and store random player name if not exists
-let playerName = localStorage.getItem('playerName');
-if (!playerName) {
-  playerName = generateRandomName();
-  localStorage.setItem('playerName', playerName);
-}
-
-// Update player name display
-function updatePlayerNameDisplay() {
-  const display = document.getElementById('playerNameDisplay');
-  if (display && playerName) {
-    display.textContent = playerName;
-  }
-}
-
 // Listen for global high score updates
 globalHighScoresRef.on('value', (snapshot) => {
   const scores = snapshot.val();
@@ -91,19 +87,10 @@ musicTracks.forEach(track => track.volume = currentVolume);
 
 // Start playing music immediately when window loads
 window.addEventListener('load', function() {
-  // Update version display
-  const versionDisplay = document.getElementById('version-display');
-  if (versionDisplay) {
-    versionDisplay.textContent = VERSION;
-  }
-  
   // Initialize music
   currentMusic.volume = currentVolume;
   currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-  
-  // Update displays
   updateHighScoresDisplay();
-  updatePlayerNameDisplay();
 });
 
 // Add color picker event listener
@@ -223,8 +210,8 @@ function init() {
   
   createFood();
   score = 0;
-  currentDirection = "ArrowRight"; // Set initial direction
-  nextDirection = "ArrowRight";    // Set initial next direction
+  currentDirection = "ArrowRight";
+  nextDirection = "ArrowRight";
   lastProcessedDirection = null;
   isWaitingAtEdge = false;
   edgeWaitStartTime = 0;
@@ -403,26 +390,51 @@ function hideAllScreens() {
   document.getElementById("game-over-screen").classList.remove("active");
 }
 
+// Game start function
 function startGame() {
-  if (isPlaying) return;
+  console.log("Starting game..."); // Debug log
+  
+  if (isPlaying) {
+    console.log("Game already in progress"); // Debug log
+    return;
+  }
   
   isPlaying = true;
   currentLevel = parseInt(document.getElementById("levelSelect").value);
+  
+  // Initialize game state
   init();
   
+  // Hide all screens and show game screen
   hideAllScreens();
   document.getElementById("game-screen").classList.add("active");
   
+  // Start music if enabled
   if (isMusicPlaying) {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
   
-  // Add keyboard event listener when game starts
+  // Remove any existing event listeners
+  document.removeEventListener("keydown", direction);
+  
+  // Add keyboard controls
   document.addEventListener("keydown", direction);
   
   // Start game loop
+  console.log("Starting game loop with speed:", gameSpeeds[currentLevel]); // Debug log
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
 }
+
+// Ensure play button is properly connected
+document.addEventListener('DOMContentLoaded', function() {
+  const playButton = document.querySelector('.play-button');
+  if (playButton) {
+    playButton.addEventListener('click', function() {
+      console.log("Play button clicked"); // Debug log
+      startGame();
+    });
+  }
+});
 
 function gameOver() {
   isPlaying = false;
@@ -461,5 +473,5 @@ function goHome() {
 function regeneratePlayerName() {
   playerName = generateRandomName();
   localStorage.setItem('playerName', playerName);
-  updatePlayerNameDisplay();
+  document.getElementById('playerNameDisplay').textContent = playerName;
 }
