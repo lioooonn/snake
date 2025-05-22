@@ -1,4 +1,4 @@
-const VERSION = "0.0.56 (PRE-ALPHA)";
+const VERSION = "v0.0.56 (PRE-ALPHA)";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -71,21 +71,11 @@ let globalHighScores = {
   3: { score: 0, player: 'None' }
 };
 
-// Firebase initialization and global high scores setup
-let globalHighScoresRef = null;
-try {
-  if (typeof firebase !== 'undefined' && firebase.database) {
-    globalHighScoresRef = firebase.database().ref('globalHighScores');
-    globalHighScoresRef.on('value', (snapshot) => {
-      const scores = snapshot.val();
-      if (scores) {
-        globalHighScores = scores;
-        updateHighScoresDisplay();
-      }
-    });
-  }
-} catch (error) {
-  console.log('Firebase not initialized or unavailable:', error);
+// Wait for Firebase to initialize
+if (window.firebaseInitialized) {
+  console.log('Firebase was initialized before script.js loaded');
+} else {
+  console.log('Waiting for Firebase initialization...');
 }
 
 // Listen for global high score updates
@@ -99,13 +89,16 @@ window.addEventListener('globalHighScoresUpdated', (event) => {
 
 // Function to update global high score
 async function updateGlobalHighScore(level, score) {
-  try {
-    if (!globalHighScoresRef) return;
+  if (!window.firebaseInitialized) {
+    console.log('Firebase not initialized, skipping global high score update');
+    return;
+  }
 
+  try {
     const currentHighScore = globalHighScores[level]?.score || 0;
     if (score > currentHighScore) {
       console.log(`New global high score for level ${level}: ${score}`);
-      await globalHighScoresRef.child(level).set({
+      await window.globalHighScoresRef.child(level).set({
         score: score,
         player: playerName,
         timestamp: firebase.database.ServerValue.TIMESTAMP

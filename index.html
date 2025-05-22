@@ -6,10 +6,6 @@
   <title>SNEK</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="snake-logo.png">
-  
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
@@ -128,31 +124,17 @@
     <div class="side-container">
       <img id="side-graphic" src="side-graphic.png" alt="Decorative Snake Graphic" />
     </div>
-    <div id="version-display"></div>
   </div>
+  <div id="version-display"></div>
 
-  <!-- GAME SCREEN -->
-  <div class="screen" id="game-screen">
-    <div class="game-info">
-      <span>Level: <span id="currentLevel">1</span></span>
-      <span>Score: <span id="currentScore">0</span></span>
-    </div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-  </div>
-
-  <!-- GAME OVER SCREEN -->
-  <div class="screen" id="game-over-screen">
-    <div class="content-container">
-      <img id="game-over-graphic" src="game-over-graphic.png" alt="Game Over Graphic" />
-      <h2>Play Again?</h2>
-      <p>Level: <span id="finalLevel">1</span></p>
-      <p>Score: <span id="finalScore">0</span></p>
-      <p>High Score: <span id="levelHighScore">0</span></p>
-      <button onclick="startGame()">Play Again</button>
-      <button onclick="goHome()">Back to Home</button>
-    </div>
-  </div>
-
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+  
+  <!-- Initialize Firebase first -->
+  <script src="firebase-config.js"></script>
+  
+  <!-- Then load the game script -->
   <script src="script.js"></script>
 </body>
 </html>
