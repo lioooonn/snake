@@ -32,17 +32,49 @@
   <audio id="gameMusic5" loop>
     <source src="music/track5.mp3" type="audio/mp3">
   </audio>
+  <audio id="gameMusic6" loop>
+    <source src="music/track6.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic7" loop>
+    <source src="music/track7.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic8" loop>
+    <source src="music/track8.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic9" loop>
+    <source src="music/track9.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic10" loop>
+    <source src="music/track10.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic11" loop>
+    <source src="music/track11.mp3" type="audio/mp3">
+  </audio>
+  <audio id="gameMusic12" loop>
+    <source src="music/track12.mp3" type="audio/mp3">
+  </audio>
 
   <!-- Music controls -->
   <div class="music-controls">
     <div class="music-select-container">
-      <select id="musicSelect" onchange="switchMusic(this.value - 1)">
-        <option value="1">(00) Title Theme</option>
-        <option value="2">(01) Snek's Theme</option>
-        <option value="3">(02) Puzzle Garden</option>
-        <option value="4">(03) Tall Grass</option>
-        <option value="5">(05) Cherry Picking</option>
-      </select>
+      <div class="music-select-group">
+        <select id="musicSelect" onchange="switchMusic(this.value - 1)">
+          <option value="1">(00) Title Theme</option>
+          <option value="2">(01) Snek's Theme</option>
+          <option value="3">(02) Puzzle Garden</option>
+          <option value="4">(03) Tall Grass</option>
+          <option value="5">(04) Empty</option>
+          <option value="6">(05) Cherry Picking</option>
+          <option value="7">(06) Empty</option>
+          <option value="8">(07) Empty</option>
+        </select>
+        <select id="musicSelect2" onchange="switchMusic(parseInt(this.value) + 7)">
+          <option value="1">(08) Steak or Snake</option>
+          <option value="2">(09) Snakesolation</option>
+          <option value="3">(10) FangRX</option>
+          <option value="4">(11) Empty</option>
+        </select>
+      </div>
       <div class="volume-control">
         <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
       </div>

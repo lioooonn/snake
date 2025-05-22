@@ -197,17 +197,28 @@ select, input[type="color"] {
   box-shadow: 0 2px 4px var(--container-shadow);
 }
 
-.music-controls:hover .music-select-container {
-  opacity: 1;
-  visibility: visible;
+.music-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
 }
 
-#musicSelect {
+.music-select-group select {
+  width: 100%;
+}
+
+#musicSelect, #musicSelect2 {
   padding: 5px 10px;
   border-radius: 5px;
   border: 1px solid var(--input-border);
   background: var(--container-bg);
   color: var(--text-color);
+}
+
+.music-controls:hover .music-select-container {
+  opacity: 1;
+  visibility: visible;
 }
 
 #toggleMusic, #themeToggle {

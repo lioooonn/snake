@@ -1,4 +1,4 @@
-const VERSION = "PRE-ALPHA v0.0.51";
+const VERSION = "0.0.52 (PRE-ALPHA)";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -9,7 +9,14 @@ const musicTracks = [
   document.getElementById("gameMusic2"),
   document.getElementById("gameMusic3"),
   document.getElementById("gameMusic4"),
-  document.getElementById("gameMusic5")
+  document.getElementById("gameMusic5"),
+  document.getElementById("gameMusic6"),
+  document.getElementById("gameMusic7"),
+  document.getElementById("gameMusic8"),
+  document.getElementById("gameMusic9"),
+  document.getElementById("gameMusic10"),
+  document.getElementById("gameMusic11"),
+  document.getElementById("gameMusic12")
 ];
 
 const canvasSize = 400;
