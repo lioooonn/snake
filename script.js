@@ -70,7 +70,7 @@ if (!playerName) {
 // Update player name display
 function updatePlayerNameDisplay() {
   const display = document.getElementById('playerNameDisplay');
-  if (display) {
+  if (display && playerName) {
     display.textContent = playerName;
   }
 }
@@ -91,9 +91,17 @@ musicTracks.forEach(track => track.volume = currentVolume);
 
 // Start playing music immediately when window loads
 window.addEventListener('load', function() {
+  // Update version display
+  const versionDisplay = document.getElementById('version-display');
+  if (versionDisplay) {
+    versionDisplay.textContent = VERSION;
+  }
+  
+  // Initialize music
   currentMusic.volume = currentVolume;
   currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-  document.getElementById('version-display').textContent = VERSION;
+  
+  // Update displays
   updateHighScoresDisplay();
   updatePlayerNameDisplay();
 });
@@ -122,16 +130,16 @@ let gameSpeeds = {
 function updateHighScoresDisplay() {
   // Update local high scores
   const highScoresList = document.getElementById('highScoresList');
-  if (!highScoresList) return; // Guard against null element
+  if (!highScoresList) return;
   
   highScoresList.innerHTML = '';
-  for (let level in highScores) {
+  Object.entries(highScores).forEach(([level, score]) => {
     highScoresList.innerHTML += `
       <div class="high-score-entry">
         <span>Level ${level}</span>
-        <span>${highScores[level]}</span>
+        <span>${score}</span>
       </div>`;
-  }
+  });
   
   // Update global high scores
   updateGlobalHighScoresDisplay();
@@ -139,17 +147,16 @@ function updateHighScoresDisplay() {
 
 function updateGlobalHighScoresDisplay() {
   const globalHighScoresList = document.getElementById('globalHighScoresList');
-  if (!globalHighScoresList) return; // Guard against null element
+  if (!globalHighScoresList) return;
   
   globalHighScoresList.innerHTML = '';
-  for (let level in globalHighScores) {
-    const scoreData = globalHighScores[level];
+  Object.entries(globalHighScores).forEach(([level, data]) => {
     globalHighScoresList.innerHTML += `
       <div class="global-score-entry">
         <span>Level ${level}</span>
-        <span><span class="player-name">${scoreData.player}</span>: ${scoreData.score}</span>
+        <span><span class="player-name">${data.player}</span>: ${data.score}</span>
       </div>`;
-  }
+  });
 }
 
 // Music controls
@@ -266,10 +273,8 @@ function direction(event) {
   
   event.preventDefault();
   
-  // Prevent 180-degree turns by checking both current and next direction
   if (isValidNextDirection(currentDirection, key) && !isOppositeDirection(lastProcessedDirection, key)) {
     nextDirection = key;
-    // If enough time has passed since last move, apply immediately
     const now = Date.now();
     if (now - lastMoveTime >= gameSpeeds[currentLevel] * 0.5) {
       currentDirection = nextDirection;
@@ -310,59 +315,38 @@ function draw() {
   }
   
   let newHead = {...snake[0]};
-  let nextPosition = {...newHead};
-
-  // Calculate next position without moving yet
+  
+  // Move snake based on direction
   switch(currentDirection) {
     case "ArrowLeft":
-      nextPosition.x -= box;
+      newHead.x -= box;
       break;
     case "ArrowUp":
-      nextPosition.y -= box;
+      newHead.y -= box;
       break;
     case "ArrowRight":
-      nextPosition.x += box;
+      newHead.x += box;
       break;
     case "ArrowDown":
-      nextPosition.y += box;
+      newHead.y += box;
       break;
   }
-
-  // Check if next position would be out of bounds
-  const willHitEdge = nextPosition.x < 0 || nextPosition.x >= canvasSize ||
-                      nextPosition.y < 0 || nextPosition.y >= canvasSize;
-
-  if (willHitEdge) {
-    if (!isWaitingAtEdge) {
-      isWaitingAtEdge = true;
-      edgeWaitStartTime = Date.now();
-    } else if (Date.now() - edgeWaitStartTime > EDGE_WAIT_TIME) {
-      clearInterval(gameInterval);
-      gameOver();
-      return;
-    }
-    // Don't move if we're at the edge
+  
+  // Check for collisions with walls
+  if (newHead.x < 0 || newHead.x >= canvasSize || newHead.y < 0 || newHead.y >= canvasSize) {
+    clearInterval(gameInterval);
+    gameOver();
     return;
-  } else {
-    // If we're not about to hit an edge, reset the edge waiting state
-    isWaitingAtEdge = false;
-    edgeWaitStartTime = 0;
-    // Move the snake
-    newHead = nextPosition;
   }
-
+  
   // Check for collision with self
   if (collision(newHead, snake)) {
     clearInterval(gameInterval);
     gameOver();
     return;
   }
-
-  // Update lastProcessedDirection after successful move
-  lastProcessedDirection = currentDirection;
-  lastMoveTime = Date.now();
-
-  // Eating food
+  
+  // Update score and create new food if snake eats food
   if (newHead.x === food.x && newHead.y === food.y) {
     score += 1;
     document.getElementById("currentScore").textContent = score;
@@ -370,8 +354,10 @@ function draw() {
   } else {
     snake.pop();
   }
-
+  
   snake.unshift(newHead);
+  lastProcessedDirection = currentDirection;
+  lastMoveTime = Date.now();
 }
 
 // Helper function to draw snake and food
@@ -431,6 +417,10 @@ function startGame() {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }
   
+  // Add keyboard event listener when game starts
+  document.addEventListener("keydown", direction);
+  
+  // Start game loop
   gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
 }
 
