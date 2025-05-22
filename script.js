@@ -1,4 +1,4 @@
-const VERSION = "0.0.52 (PRE-ALPHA)";
+const VERSION = "0.0.53 (PRE-ALPHA)";
 
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -95,6 +95,20 @@ function switchMusic(index) {
   currentMusic.currentTime = 0;
   currentMusic = musicTracks[index];
   currentMusic.volume = currentVolume;
+  
+  // Update the preview text
+  const select1 = document.getElementById('musicSelect');
+  const select2 = document.getElementById('musicSelect2');
+  let trackName;
+  
+  if (index < 8) {
+    trackName = select1.options[index].text;
+  } else {
+    trackName = select2.options[index - 8].text;
+  }
+  
+  document.getElementById('currentTrackName').textContent = trackName;
+  
   if (isMusicPlaying) {
     currentMusic.play().catch(e => console.log("Audio playback failed:", e));
   }

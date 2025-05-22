@@ -197,6 +197,15 @@ select, input[type="color"] {
   box-shadow: 0 2px 4px var(--container-shadow);
 }
 
+.music-preview {
+  margin-bottom: 10px;
+  padding: 5px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--input-border);
+}
+
 .music-select-group {
   display: flex;
   flex-direction: column;
