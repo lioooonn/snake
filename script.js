@@ -1,4 +1,4 @@
-const VERSION = "v0.0.69 (PRE-ALPHA)";
+const VERSION = "v0.0.71 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -441,6 +441,35 @@ function gameOver() {
   document.getElementById("levelHighScore").textContent = highScores[currentLevel];
 }
 
+// Global high score functions
+async function updateGlobalHighScore(level, score) {
+  if (!window.firebaseInitialized) {
+    console.log('Firebase not initialized, skipping global high score update');
+    return;
+  }
+
+  try {
+    const currentHighScore = globalHighScores[level]?.score || 0;
+    if (score > currentHighScore) {
+      console.log(`New global high score for level ${level}: ${score}`);
+      await window.globalHighScoresRef.child(level).set({
+        score: score,
+        player: playerName,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+      });
+      
+      // Update local copy immediately
+      globalHighScores[level] = {
+        score: score,
+        player: playerName
+      };
+      updateHighScoresDisplay();
+    }
+  } catch (error) {
+    console.error('Error updating global high score:', error);
+  }
+}
+
 // Game control functions
 function goHome() {
   if (gameInterval) {
@@ -516,35 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
       updateHighScoresDisplay();
     }
   });
-
-  // Function to update global high score
-  async function updateGlobalHighScore(level, score) {
-    if (!window.firebaseInitialized) {
-      console.log('Firebase not initialized, skipping global high score update');
-      return;
-    }
-
-    try {
-      const currentHighScore = globalHighScores[level]?.score || 0;
-      if (score > currentHighScore) {
-        console.log(`New global high score for level ${level}: ${score}`);
-        await window.globalHighScoresRef.child(level).set({
-          score: score,
-          player: playerName,
-          timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-        
-        // Update local copy immediately
-        globalHighScores[level] = {
-          score: score,
-          player: playerName
-        };
-        updateHighScoresDisplay();
-      }
-    } catch (error) {
-      console.error('Error updating global high score:', error);
-    }
-  }
 
   // Start playing music immediately when window loads
   window.addEventListener('load', function() {
