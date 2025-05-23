@@ -1,4 +1,12 @@
-const VERSION = "v0.0.64 (PRE-ALPHA)";
+const VERSION = "v0.0.65 (PRE-ALPHA)";
+
+// Global variables
+let currentVolume = localStorage.getItem('volume') || 0.5;
+let isMusicPlaying = true;
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
+let currentMusic = null;
+let musicTracks = [];
+let isPlaying = false;
 
 // Initialize displays immediately
 document.getElementById('version-display').textContent = VERSION;
@@ -21,6 +29,78 @@ if (!playerName) {
   localStorage.setItem('playerName', playerName);
 }
 
+// Global functions
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  localStorage.setItem('darkMode', isDarkMode);
+  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
+  
+  // Update snake color for better visibility in dark mode
+  if (typeof snakeColor !== 'undefined') {
+    snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
+  }
+}
+
+function switchMusic(index) {
+  if (index >= musicTracks.length || !musicTracks[index]) {
+    console.log("Music track not available:", index);
+    return;
+  }
+  
+  if (currentMusic) {
+    currentMusic.pause();
+    currentMusic.currentTime = 0;
+  }
+  
+  currentMusic = musicTracks[index];
+  if (currentMusic) {
+    currentMusic.volume = currentVolume;
+    
+    // Update the preview text
+    const select = document.getElementById('musicSelect');
+    if (select && select.options[index]) {
+      const trackName = select.options[index].text;
+      document.getElementById('currentTrackName').textContent = trackName;
+    }
+    
+    if (isMusicPlaying) {
+      currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    }
+  }
+}
+
+function toggleMusic() {
+  isMusicPlaying = !isMusicPlaying;
+  const btn = document.getElementById("toggleMusic");
+  if (isMusicPlaying && currentMusic) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    btn.innerHTML = '<span class="icon">🔊</span>';
+  } else if (currentMusic) {
+    currentMusic.pause();
+    btn.innerHTML = '<span class="icon">🔇</span>';
+  }
+}
+
+function updateVolume(value) {
+  currentVolume = value;
+  localStorage.setItem('volume', value);
+  musicTracks.forEach(track => {
+    if (track) {
+      track.volume = value;
+    }
+  });
+}
+
+function goHome() {
+  if (gameInterval) {
+    clearInterval(gameInterval);
+  }
+  hideAllScreens();
+  document.getElementById("home-screen").classList.add("active");
+  updateHighScoresDisplay();
+}
+
 // Wait for DOM to be fully loaded before accessing elements
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize canvas
@@ -31,29 +111,53 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('version-display').textContent = VERSION;
   document.getElementById('playerNameDisplay').textContent = playerName;
   
-  // Get all music elements
-  const musicTracks = [
+  // Get all music elements and store them in the global musicTracks array
+  musicTracks = [
     document.getElementById("gameMusic"),
     document.getElementById("gameMusic2"),
     document.getElementById("gameMusic3"),
     document.getElementById("gameMusic4")
   ];
+  currentMusic = musicTracks[0];
 
-  const canvasSize = 400;
-  const box = 20;
+  // Set initial volume
+  document.getElementById('volumeSlider').value = currentVolume;
+  musicTracks.forEach(track => {
+    if (track) {
+      track.volume = currentVolume;
+    }
+  });
 
-  let snake, food, score, gameInterval, isPlaying = false;
-  let snakeColor = "#00cc00"; // Default color
-  let currentLevel = 1;
-  let currentMusic = musicTracks[0];
-  let isMusicPlaying = true;
-  let isDarkMode = localStorage.getItem('darkMode') === 'true';
-
-  // Initialize theme from localStorage
+  // Initialize theme
   if (isDarkMode) {
     document.body.setAttribute('data-theme', 'dark');
     document.getElementById('themeToggle').innerHTML = '<span class="icon">🌜</span>';
   }
+
+  // Set up event listeners
+  document.getElementById('playButton').addEventListener('click', startGame);
+  document.getElementById('volumeSlider').addEventListener('change', (e) => updateVolume(e.target.value));
+  document.getElementById('musicSelect').addEventListener('change', (e) => switchMusic(e.target.value - 1));
+  document.getElementById('toggleMusic').addEventListener('click', toggleMusic);
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  document.getElementById('homeButton').addEventListener('click', goHome);
+
+  const canvasSize = 400;
+  const box = 20;
+
+  let snake, food, score, gameInterval, isWaitingAtEdge = false;
+  let snakeColor = "#00cc00"; // Default color
+  let currentLevel = 1;
+  let lastProcessedDirection = null;
+  let lastMoveTime = 0;
+  let edgeWaitStartTime = 0;
+  const EDGE_WAIT_TIME = 25; // Reduced to 50ms
+
+  let gameSpeeds = {
+    1: 130, // Normal speed (was 100)
+    2: 100, // Fast (was 70)
+    3: 80   // Super fast (was 50)
+  };
 
   // Initialize high scores
   let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
@@ -114,15 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Set initial volume and start music
-  let currentVolume = localStorage.getItem('volume') || 0.5;
-  document.getElementById('volumeSlider').value = currentVolume;
-  musicTracks.forEach(track => {
-    if (track) { // Check if track exists
-      track.volume = currentVolume;
-    }
-  });
-
   // Start playing music immediately when window loads
   window.addEventListener('load', function() {
     // Initialize music
@@ -141,17 +236,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Movement queue system
   let currentDirection = null;
   let nextDirection = null;
-  let lastProcessedDirection = null;
-  let lastMoveTime = 0;
-  let isWaitingAtEdge = false;
-  let edgeWaitStartTime = 0;
-  const EDGE_WAIT_TIME = 25; // Reduced to 50ms
-
-  let gameSpeeds = {
-    1: 130, // Normal speed (was 100)
-    2: 100, // Fast (was 70)
-    3: 80   // Super fast (was 50)
-  };
 
   // Update high scores display
   function updateHighScoresDisplay() {
@@ -197,68 +281,6 @@ document.addEventListener('DOMContentLoaded', function() {
           <span><span class="player-name">${data.player}</span>: ${data.score}</span>
         </div>`;
     });
-  }
-
-  // Music controls
-  function updateVolume(value) {
-    currentVolume = value;
-    localStorage.setItem('volume', value);
-    musicTracks.forEach(track => {
-      if (track) { // Check if track exists
-        track.volume = value;
-      }
-    });
-  }
-
-  function switchMusic(index) {
-    if (index >= musicTracks.length || !musicTracks[index]) {
-      console.log("Music track not available:", index);
-      return;
-    }
-    
-    if (currentMusic) {
-      currentMusic.pause();
-      currentMusic.currentTime = 0;
-    }
-    
-    currentMusic = musicTracks[index];
-    if (currentMusic) {
-      currentMusic.volume = currentVolume;
-      
-      // Update the preview text
-      const select = document.getElementById('musicSelect');
-      if (select && select.options[index]) {
-        const trackName = select.options[index].text;
-        document.getElementById('currentTrackName').textContent = trackName;
-      }
-      
-      if (isMusicPlaying) {
-        currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-      }
-    }
-  }
-
-  function toggleMusic() {
-    isMusicPlaying = !isMusicPlaying;
-    const btn = document.getElementById("toggleMusic");
-    if (isMusicPlaying && currentMusic) {
-      currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-      btn.innerHTML = '<span class="icon">🔊</span>';
-    } else if (currentMusic) {
-      currentMusic.pause();
-      btn.innerHTML = '<span class="icon">🔇</span>';
-    }
-  }
-
-  // Theme toggle
-  function toggleTheme() {
-    isDarkMode = !isDarkMode;
-    localStorage.setItem('darkMode', isDarkMode);
-    document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
-    
-    // Update snake color for better visibility in dark mode
-    snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
   }
 
   // Game initialization
@@ -541,13 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("finalScore").textContent = score;
     document.getElementById("finalLevel").textContent = currentLevel;
     document.getElementById("levelHighScore").textContent = highScores[currentLevel];
-  }
-
-  function goHome() {
-    clearInterval(gameInterval);
-    hideAllScreens();
-    document.getElementById("home-screen").classList.add("active");
-    updateHighScoresDisplay();
   }
 
   // Add function to generate new random name
