@@ -441,6 +441,25 @@ function gameOver() {
   document.getElementById("levelHighScore").textContent = highScores[currentLevel];
 }
 
+// Game control functions
+function goHome() {
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  hideAllScreens();
+  document.getElementById("home-screen").classList.add("active");
+  updateHighScoresDisplay();
+}
+
+function playAgain() {
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  startGame();
+}
+
 // Wait for DOM to be fully loaded before accessing elements
 document.addEventListener('DOMContentLoaded', function() {
   const canvas = document.getElementById("gameCanvas");
