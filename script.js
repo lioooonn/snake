@@ -1,4 +1,4 @@
-const VERSION = "v0.0.65 (PRE-ALPHA)";
+const VERSION = "v0.0.66 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -7,6 +7,27 @@ let isDarkMode = localStorage.getItem('darkMode') === 'true';
 let currentMusic = null;
 let musicTracks = [];
 let isPlaying = false;
+let gameInterval = null;
+let snake = [];
+let food = null;
+let score = 0;
+let currentLevel = 1;
+let snakeColor = "#00cc00";
+let currentDirection = null;
+let nextDirection = null;
+let lastProcessedDirection = null;
+let lastMoveTime = 0;
+let isWaitingAtEdge = false;
+let edgeWaitStartTime = 0;
+const EDGE_WAIT_TIME = 25;
+const canvasSize = 400;
+const box = 20;
+
+const gameSpeeds = {
+  1: 130, // Normal speed
+  2: 100, // Fast
+  3: 80   // Super fast
+};
 
 // Initialize displays immediately
 document.getElementById('version-display').textContent = VERSION;
@@ -95,15 +116,23 @@ function updateVolume(value) {
 function goHome() {
   if (gameInterval) {
     clearInterval(gameInterval);
+    gameInterval = null;
   }
   hideAllScreens();
   document.getElementById("home-screen").classList.add("active");
   updateHighScoresDisplay();
 }
 
+function playAgain() {
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  startGame();
+}
+
 // Wait for DOM to be fully loaded before accessing elements
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize canvas
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
   
@@ -141,23 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('toggleMusic').addEventListener('click', toggleMusic);
   document.getElementById('themeToggle').addEventListener('click', toggleTheme);
   document.getElementById('homeButton').addEventListener('click', goHome);
-
-  const canvasSize = 400;
-  const box = 20;
-
-  let snake, food, score, gameInterval, isWaitingAtEdge = false;
-  let snakeColor = "#00cc00"; // Default color
-  let currentLevel = 1;
-  let lastProcessedDirection = null;
-  let lastMoveTime = 0;
-  let edgeWaitStartTime = 0;
-  const EDGE_WAIT_TIME = 25; // Reduced to 50ms
-
-  let gameSpeeds = {
-    1: 130, // Normal speed (was 100)
-    2: 100, // Fast (was 70)
-    3: 80   // Super fast (was 50)
-  };
+  document.getElementById('playAgainButton').addEventListener('click', playAgain);
 
   // Initialize high scores
   let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
@@ -394,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let newHead = {...snake[0]};
     
-    // Move snake based on direction
+    // Calculate new head position
     switch(currentDirection) {
       case "ArrowLeft":
         newHead.x -= box;
@@ -411,15 +424,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Check for collisions with walls
+    const now = Date.now();
     if (newHead.x < 0 || newHead.x >= canvasSize || newHead.y < 0 || newHead.y >= canvasSize) {
-      clearInterval(gameInterval);
-      gameOver();
-      return;
+      if (!isWaitingAtEdge) {
+        isWaitingAtEdge = true;
+        edgeWaitStartTime = now;
+        return; // Skip this frame
+      } else if (now - edgeWaitStartTime < EDGE_WAIT_TIME) {
+        return; // Still waiting
+      } else {
+        // Time's up, game over
+        clearInterval(gameInterval);
+        gameInterval = null;
+        gameOver();
+        return;
+      }
     }
     
+    // Reset edge waiting if not at edge
+    isWaitingAtEdge = false;
+
     // Check for collision with self
     if (collision(newHead, snake)) {
       clearInterval(gameInterval);
+      gameInterval = null;
       gameOver();
       return;
     }
@@ -432,10 +460,10 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       snake.pop();
     }
-    
+
     snake.unshift(newHead);
     lastProcessedDirection = currentDirection;
-    lastMoveTime = Date.now();
+    lastMoveTime = now;
   }
 
   // Helper function to draw snake and food
