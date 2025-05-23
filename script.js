@@ -1,4 +1,4 @@
-const VERSION = "v0.0.75 (PRE-ALPHA)";
+const VERSION = "v0.0.76 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -425,8 +425,11 @@ function gameOver() {
   if (score > highScores[currentLevel]) {
     highScores[currentLevel] = score;
     localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-    
-    // Try to update global high score
+  }
+  
+  // Check and update global high score independently
+  const globalHighScore = globalHighScores[currentLevel]?.score || 0;
+  if (score > globalHighScore) {
     updateGlobalHighScore(currentLevel, score);
   }
   

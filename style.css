@@ -410,7 +410,7 @@ button:hover {
 
 .side-container {
   position: absolute;
-  left: calc(50% + 450px); /* Increased from 300px to 450px to account for wider main container */
+  left: calc(50% + 500px);
   top: 50%;
   transform: translateY(-50%);
   background: var(--container-bg);
