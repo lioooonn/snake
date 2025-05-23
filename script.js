@@ -1,4 +1,4 @@
-const VERSION = "v0.0.71 (PRE-ALPHA)";
+const VERSION = "v0.0.72 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -443,30 +443,49 @@ function gameOver() {
 
 // Global high score functions
 async function updateGlobalHighScore(level, score) {
+  console.log(`Attempting to update global high score for level ${level} with score ${score}`);
+  console.log('Firebase initialized:', window.firebaseInitialized);
+  console.log('Current global high scores:', globalHighScores);
+  
   if (!window.firebaseInitialized) {
-    console.log('Firebase not initialized, skipping global high score update');
+    console.error('Firebase not initialized, skipping global high score update');
     return;
   }
 
   try {
     const currentHighScore = globalHighScores[level]?.score || 0;
+    console.log(`Current high score for level ${level}: ${currentHighScore}`);
+    
     if (score > currentHighScore) {
       console.log(`New global high score for level ${level}: ${score}`);
-      await window.globalHighScoresRef.child(level).set({
+      const updateData = {
         score: score,
         player: playerName,
         timestamp: firebase.database.ServerValue.TIMESTAMP
-      });
+      };
+      console.log('Sending update to Firebase:', updateData);
+      
+      await window.globalHighScoresRef.child(level).set(updateData);
+      console.log('Successfully updated Firebase');
       
       // Update local copy immediately
       globalHighScores[level] = {
         score: score,
         player: playerName
       };
+      console.log('Updated local global high scores:', globalHighScores);
       updateHighScoresDisplay();
+    } else {
+      console.log(`Score ${score} not higher than current high score ${currentHighScore}`);
     }
   } catch (error) {
     console.error('Error updating global high score:', error);
+    console.error('Error details:', {
+      level,
+      score,
+      firebaseRef: window.globalHighScoresRef,
+      error: error.message
+    });
   }
 }
 

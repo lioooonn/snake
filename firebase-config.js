@@ -1,8 +1,10 @@
 // Firebase configuration and initialization
 const initializeFirebase = () => {
   try {
+    console.log('Attempting to initialize Firebase...');
     // Initialize Firebase if not already initialized
     if (!firebase.apps.length) {
+      console.log('No existing Firebase app found, initializing new one...');
       firebase.initializeApp({
         apiKey: "AIzaSyCJ9d-6Ch4FBAgNsbTVLf0_18bm7Nv0kng",
         authDomain: "snek-global.firebaseapp.com",
@@ -13,22 +15,37 @@ const initializeFirebase = () => {
         appId: "1:498490615212:web:1a7c45bc8b960823a38609",
         measurementId: "G-5WPD2ZH5X9"
       });
+      console.log('Firebase app initialized successfully');
+    } else {
+      console.log('Firebase app already initialized');
     }
 
     const database = firebase.database();
     const globalHighScoresRef = database.ref('globalHighScores');
 
+    // Test database connection
+    database.ref('.info/connected').on('value', (snap) => {
+      if (snap.val() === true) {
+        console.log('Connected to Firebase database');
+      } else {
+        console.log('Not connected to Firebase database');
+      }
+    });
+
     // Set up real-time listener for high scores
     globalHighScoresRef.on('value', (snapshot) => {
-      console.log('Received new high scores:', snapshot.val());
+      const data = snapshot.val();
+      console.log('Received new high scores from Firebase:', data);
       window.dispatchEvent(new CustomEvent('globalHighScoresUpdated', {
-        detail: snapshot.val()
+        detail: data
       }));
+    }, (error) => {
+      console.error('Error receiving high scores:', error);
     });
 
     // Export for use in other files
     window.globalHighScoresRef = globalHighScoresRef;
-    console.log('Firebase initialized successfully');
+    console.log('Firebase setup complete');
     
     return true;
 
