@@ -1,4 +1,4 @@
-const VERSION = "v0.0.74 (PRE-ALPHA)";
+const VERSION = "v0.0.75 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
