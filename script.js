@@ -1,4 +1,4 @@
-const VERSION = "v0.0.66 (PRE-ALPHA)";
+const VERSION = "v0.0.68 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -22,6 +22,42 @@ let edgeWaitStartTime = 0;
 const EDGE_WAIT_TIME = 25;
 const canvasSize = 400;
 const box = 20;
+
+// Screen management functions
+function hideAllScreens() {
+  document.getElementById("home-screen").classList.remove("active");
+  document.getElementById("game-screen").classList.remove("active");
+  document.getElementById("game-over-screen").classList.remove("active");
+}
+
+// Game functions
+function startGame() {
+  console.log("Starting game...");
+  
+  if (isPlaying) {
+    console.log("Game already in progress");
+    return;
+  }
+  
+  currentLevel = parseInt(document.getElementById("levelSelect").value);
+  console.log("Selected level:", currentLevel);
+  
+  init();
+  isPlaying = true;
+  
+  hideAllScreens();
+  document.getElementById("game-screen").classList.add("active");
+  
+  if (isMusicPlaying && currentMusic) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+  }
+  
+  document.removeEventListener("keydown", direction);
+  document.addEventListener("keydown", direction);
+  
+  console.log("Starting game loop with speed:", gameSpeeds[currentLevel]);
+  gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
+}
 
 // Initialize high scores
 let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
@@ -125,6 +161,169 @@ function updateVolume(value) {
       track.volume = value;
     }
   });
+}
+
+// Game initialization
+function init() {
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  
+  snake = [{
+    x: Math.floor(canvasSize/(2*box)) * box,
+    y: Math.floor(canvasSize/(2*box)) * box
+  }];
+  
+  score = 0;
+  currentDirection = "ArrowRight";
+  nextDirection = "ArrowRight";
+  lastProcessedDirection = null;
+  isWaitingAtEdge = false;
+  edgeWaitStartTime = 0;
+  
+  createFood();
+  
+  document.getElementById("currentLevel").textContent = currentLevel;
+  document.getElementById("currentScore").textContent = score;
+}
+
+function createFood() {
+  let newFood;
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * (canvasSize/box)) * box,
+      y: Math.floor(Math.random() * (canvasSize/box)) * box
+    };
+  } while (isOnSnake(newFood));
+  
+  food = newFood;
+}
+
+function isOnSnake(position) {
+  return snake.some(segment => segment.x === position.x && segment.y === position.y);
+}
+
+function draw() {
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  
+  ctx.fillStyle = isDarkMode ? "#1a1a1a" : "#FFFFFF";
+  ctx.fillRect(0, 0, canvasSize, canvasSize);
+  
+  // Draw checkerboard pattern
+  ctx.fillStyle = isDarkMode ? "#2a2a2a" : "#F0F0F0";
+  for (let i = 0; i < canvasSize/box; i++) {
+    for (let j = 0; j < canvasSize/box; j++) {
+      if ((i + j) % 2 === 0) {
+        ctx.fillRect(i * box, j * box, box, box);
+      }
+    }
+  }
+
+  // Draw snake and food
+  drawSnakeAndFood(ctx);
+  
+  // Process movement queue
+  if (nextDirection && isValidNextDirection(currentDirection, nextDirection)) {
+    currentDirection = nextDirection;
+  }
+  
+  let newHead = {...snake[0]};
+  
+  // Calculate new head position
+  switch(currentDirection) {
+    case "ArrowLeft":
+      newHead.x -= box;
+      break;
+    case "ArrowUp":
+      newHead.y -= box;
+      break;
+    case "ArrowRight":
+      newHead.x += box;
+      break;
+    case "ArrowDown":
+      newHead.y += box;
+      break;
+  }
+  
+  // Check for collisions with walls
+  const now = Date.now();
+  if (newHead.x < 0 || newHead.x >= canvasSize || newHead.y < 0 || newHead.y >= canvasSize) {
+    if (!isWaitingAtEdge) {
+      isWaitingAtEdge = true;
+      edgeWaitStartTime = now;
+      return; // Skip this frame
+    } else if (now - edgeWaitStartTime < EDGE_WAIT_TIME) {
+      return; // Still waiting
+    } else {
+      // Time's up, game over
+      clearInterval(gameInterval);
+      gameInterval = null;
+      gameOver();
+      return;
+    }
+  }
+  
+  // Reset edge waiting if not at edge
+  isWaitingAtEdge = false;
+
+  // Check for collision with self
+  if (collision(newHead, snake)) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+    gameOver();
+    return;
+  }
+  
+  // Update score and create new food if snake eats food
+  if (newHead.x === food.x && newHead.y === food.y) {
+    score += 1;
+    document.getElementById("currentScore").textContent = score;
+    createFood();
+  } else {
+    snake.pop();
+  }
+
+  snake.unshift(newHead);
+  lastProcessedDirection = currentDirection;
+  lastMoveTime = now;
+}
+
+function drawSnakeAndFood(ctx) {
+  // Draw snake with smooth corners
+  for (let i = 0; i < snake.length; i++) {
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
+    ctx.fillStyle = snakeColor;
+    ctx.fill();
+    
+    if (i > 0) {
+      const curr = snake[i];
+      const prev = snake[i-1];
+      ctx.fillStyle = snakeColor;
+      if (curr.x === prev.x) {
+        const y = Math.min(curr.y, prev.y);
+        ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
+      } else {
+        const x = Math.min(curr.x, prev.x);
+        ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
+      }
+    }
+  }
+
+  // Draw food as a smooth circle
+  ctx.beginPath();
+  ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
+}
+
+function collision(head, array) {
+  // Skip collision check with the tail piece that's about to be removed
+  // This prevents false collisions when the snake is moving
+  const checkArray = array.slice(0, -1);
+  return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
 function goHome() {
@@ -296,58 +495,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Game utility functions
-  function hideAllScreens() {
-    document.getElementById("home-screen").classList.remove("active");
-    document.getElementById("game-screen").classList.remove("active");
-    document.getElementById("game-over-screen").classList.remove("active");
-  }
-
-  function init() {
-    // Clear any existing game interval
-    if (gameInterval) {
-      clearInterval(gameInterval);
-      gameInterval = null;
-    }
-    
-    // Initialize snake
-    snake = [{
-      x: Math.floor(canvasSize/(2*box)) * box,
-      y: Math.floor(canvasSize/(2*box)) * box
-    }];
-    
-    // Reset game state
-    score = 0;
-    currentDirection = "ArrowRight";
-    nextDirection = "ArrowRight";
-    lastProcessedDirection = null;
-    isWaitingAtEdge = false;
-    edgeWaitStartTime = 0;
-    
-    // Create initial food
-    createFood();
-    
-    // Update display
-    document.getElementById("currentLevel").textContent = currentLevel;
-    document.getElementById("currentScore").textContent = score;
-  }
-
-  function createFood() {
-    let newFood;
-    do {
-      newFood = {
-        x: Math.floor(Math.random() * (canvasSize/box)) * box,
-        y: Math.floor(Math.random() * (canvasSize/box)) * box
-      };
-    } while (isOnSnake(newFood));
-    
-    food = newFood;
-  }
-
-  function isOnSnake(position) {
-    return snake.some(segment => segment.x === position.x && segment.y === position.y);
-  }
-
   function direction(event) {
     const key = event.key;
     if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
@@ -384,159 +531,6 @@ document.addEventListener('DOMContentLoaded', function() {
       (dir1 === 'ArrowLeft' && dir2 === 'ArrowRight') ||
       (dir1 === 'ArrowRight' && dir2 === 'ArrowLeft')
     );
-  }
-
-  function draw() {
-    ctx.fillStyle = isDarkMode ? "#1a1a1a" : "#FFFFFF";
-    ctx.fillRect(0, 0, canvasSize, canvasSize);
-    
-    // Draw checkerboard pattern
-    ctx.fillStyle = isDarkMode ? "#2a2a2a" : "#F0F0F0";
-    for (let i = 0; i < canvasSize/box; i++) {
-      for (let j = 0; j < canvasSize/box; j++) {
-        if ((i + j) % 2 === 0) {
-          ctx.fillRect(i * box, j * box, box, box);
-        }
-      }
-    }
-
-    // Draw snake and food
-    drawSnakeAndFood(ctx);
-    
-    // Process movement queue
-    if (nextDirection && isValidNextDirection(currentDirection, nextDirection)) {
-      currentDirection = nextDirection;
-    }
-    
-    let newHead = {...snake[0]};
-    
-    // Calculate new head position
-    switch(currentDirection) {
-      case "ArrowLeft":
-        newHead.x -= box;
-        break;
-      case "ArrowUp":
-        newHead.y -= box;
-        break;
-      case "ArrowRight":
-        newHead.x += box;
-        break;
-      case "ArrowDown":
-        newHead.y += box;
-        break;
-    }
-    
-    // Check for collisions with walls
-    const now = Date.now();
-    if (newHead.x < 0 || newHead.x >= canvasSize || newHead.y < 0 || newHead.y >= canvasSize) {
-      if (!isWaitingAtEdge) {
-        isWaitingAtEdge = true;
-        edgeWaitStartTime = now;
-        return; // Skip this frame
-      } else if (now - edgeWaitStartTime < EDGE_WAIT_TIME) {
-        return; // Still waiting
-      } else {
-        // Time's up, game over
-        clearInterval(gameInterval);
-        gameInterval = null;
-        gameOver();
-        return;
-      }
-    }
-    
-    // Reset edge waiting if not at edge
-    isWaitingAtEdge = false;
-
-    // Check for collision with self
-    if (collision(newHead, snake)) {
-      clearInterval(gameInterval);
-      gameInterval = null;
-      gameOver();
-      return;
-    }
-    
-    // Update score and create new food if snake eats food
-    if (newHead.x === food.x && newHead.y === food.y) {
-      score += 1;
-      document.getElementById("currentScore").textContent = score;
-      createFood();
-    } else {
-      snake.pop();
-    }
-
-    snake.unshift(newHead);
-    lastProcessedDirection = currentDirection;
-    lastMoveTime = now;
-  }
-
-  function drawSnakeAndFood(ctx) {
-    // Draw snake with smooth corners
-    for (let i = 0; i < snake.length; i++) {
-      ctx.beginPath();
-      ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
-      ctx.fillStyle = snakeColor;
-      ctx.fill();
-      
-      if (i > 0) {
-        const curr = snake[i];
-        const prev = snake[i-1];
-        ctx.fillStyle = snakeColor;
-        if (curr.x === prev.x) {
-          const y = Math.min(curr.y, prev.y);
-          ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
-        } else {
-          const x = Math.min(curr.x, prev.x);
-          ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
-        }
-      }
-    }
-
-    // Draw food as a smooth circle
-    ctx.beginPath();
-    ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
-    ctx.fillStyle = "red";
-    ctx.fill();
-  }
-
-  function collision(head, array) {
-    // Skip collision check with the tail piece that's about to be removed
-    // This prevents false collisions when the snake is moving
-    const checkArray = array.slice(0, -1);
-    return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
-  }
-
-  function startGame() {
-    console.log("Starting game..."); // Debug log
-    
-    if (isPlaying) {
-      console.log("Game already in progress"); // Debug log
-      return;
-    }
-    
-    // Get selected level
-    currentLevel = parseInt(document.getElementById("levelSelect").value);
-    console.log("Selected level:", currentLevel); // Debug log
-    
-    // Initialize game
-    init();
-    isPlaying = true;
-    
-    // Switch screens
-    hideAllScreens();
-    document.getElementById("game-screen").classList.add("active");
-    
-    // Start music if enabled
-    if (isMusicPlaying && currentMusic) {
-      currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-    }
-    
-    // Set up keyboard controls
-    document.removeEventListener("keydown", direction);
-    document.addEventListener("keydown", direction);
-    
-    // Start game loop
-    console.log("Starting game loop with speed:", gameSpeeds[currentLevel]); // Debug log
-    gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
   }
 
   function gameOver() {
