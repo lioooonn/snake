@@ -1,4 +1,4 @@
-const VERSION = "v0.0.72 (PRE-ALPHA)";
+const VERSION = "v0.0.73 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -518,12 +518,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('playerNameDisplay').textContent = playerName;
   
   // Get all music elements and store them in the global musicTracks array
-  musicTracks = [
-    document.getElementById("gameMusic"),
-    document.getElementById("gameMusic2"),
-    document.getElementById("gameMusic3"),
-    document.getElementById("gameMusic4")
-  ];
+  musicTracks = Array.from({length: 12}, (_, i) => document.getElementById(`gameMusic${i + 1}`));
+  musicTracks[0] = document.getElementById("gameMusic"); // First track has no number
   currentMusic = musicTracks[0];
 
   // Set initial volume
