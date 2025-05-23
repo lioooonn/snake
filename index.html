@@ -133,6 +133,26 @@
   </div>
   <div id="version-display"></div>
 
+  <!-- GAME SCREEN -->
+  <div class="screen" id="game-screen">
+    <div class="game-info">
+      Level: <span id="currentLevel">1</span>
+      Score: <span id="currentScore">0</span>
+    </div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="screen" id="game-over-screen">
+    <div class="content-container">
+      <h2>Game Over!</h2>
+      <p>Final Score: <span id="finalScore">0</span></p>
+      <p>Level: <span id="finalLevel">1</span></p>
+      <p>Level High Score: <span id="levelHighScore">0</span></p>
+      <button onclick="goHome()">Back to Home</button>
+    </div>
+  </div>
+
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>

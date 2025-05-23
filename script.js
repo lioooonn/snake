@@ -1,4 +1,4 @@
-const VERSION = "v0.0.56 (PRE-ALPHA)";
+const VERSION = "v0.0.64 (PRE-ALPHA)";
 
 // Initialize displays immediately
 document.getElementById('version-display').textContent = VERSION;
