@@ -1,4 +1,4 @@
-const VERSION = "v0.0.68 (PRE-ALPHA)";
+const VERSION = "v0.0.69 (PRE-ALPHA)";
 
 // Global variables
 let currentVolume = localStorage.getItem('volume') || 0.5;
@@ -13,8 +13,8 @@ let food = null;
 let score = 0;
 let currentLevel = 1;
 let snakeColor = "#00cc00";
-let currentDirection = null;
-let nextDirection = null;
+let currentDirection = "ArrowRight";
+let nextDirection = "ArrowRight";
 let lastProcessedDirection = null;
 let lastMoveTime = 0;
 let isWaitingAtEdge = false;
@@ -22,56 +22,6 @@ let edgeWaitStartTime = 0;
 const EDGE_WAIT_TIME = 25;
 const canvasSize = 400;
 const box = 20;
-
-// Screen management functions
-function hideAllScreens() {
-  document.getElementById("home-screen").classList.remove("active");
-  document.getElementById("game-screen").classList.remove("active");
-  document.getElementById("game-over-screen").classList.remove("active");
-}
-
-// Game functions
-function startGame() {
-  console.log("Starting game...");
-  
-  if (isPlaying) {
-    console.log("Game already in progress");
-    return;
-  }
-  
-  currentLevel = parseInt(document.getElementById("levelSelect").value);
-  console.log("Selected level:", currentLevel);
-  
-  init();
-  isPlaying = true;
-  
-  hideAllScreens();
-  document.getElementById("game-screen").classList.add("active");
-  
-  if (isMusicPlaying && currentMusic) {
-    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-  }
-  
-  document.removeEventListener("keydown", direction);
-  document.addEventListener("keydown", direction);
-  
-  console.log("Starting game loop with speed:", gameSpeeds[currentLevel]);
-  gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
-}
-
-// Initialize high scores
-let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
-  1: 0,
-  2: 0,
-  3: 0
-};
-
-// Initialize global high scores
-let globalHighScores = {
-  1: { score: 0, player: 'None' },
-  2: { score: 0, player: 'None' },
-  3: { score: 0, player: 'None' }
-};
 
 const gameSpeeds = {
   1: 130, // Normal speed
@@ -82,88 +32,30 @@ const gameSpeeds = {
 // Initialize displays immediately
 document.getElementById('version-display').textContent = VERSION;
 
-// Random name generation
-const adjectives = ['Swift', 'Sneaky', 'Slithery', 'Speedy', 'Smooth', 'Silent', 'Stealthy', 'Skilled'];
-const nouns = ['Snake', 'Serpent', 'Viper', 'Python', 'Cobra', 'Mamba', 'Asp', 'Boa'];
-
-function generateRandomName() {
-  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  const number = Math.floor(Math.random() * 1000);
-  return `${adj}${noun}${number}`;
+// Screen management functions
+function hideAllScreens() {
+  document.getElementById("home-screen").classList.remove("active");
+  document.getElementById("game-screen").classList.remove("active");
+  document.getElementById("game-over-screen").classList.remove("active");
 }
 
-// Initialize player name immediately
-let playerName = localStorage.getItem('playerName');
-if (!playerName) {
-  playerName = generateRandomName();
-  localStorage.setItem('playerName', playerName);
+// Game utility functions
+function isOnSnake(position) {
+  return snake.some(segment => segment.x === position.x && segment.y === position.y);
 }
 
-// Global functions
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  localStorage.setItem('darkMode', isDarkMode);
-  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
+function createFood() {
+  let newFood;
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * (canvasSize/box)) * box,
+      y: Math.floor(Math.random() * (canvasSize/box)) * box
+    };
+  } while (isOnSnake(newFood));
   
-  // Update snake color for better visibility in dark mode
-  if (typeof snakeColor !== 'undefined') {
-    snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
-  }
+  food = newFood;
 }
 
-function switchMusic(index) {
-  if (index >= musicTracks.length || !musicTracks[index]) {
-    console.log("Music track not available:", index);
-    return;
-  }
-  
-  if (currentMusic) {
-    currentMusic.pause();
-    currentMusic.currentTime = 0;
-  }
-  
-  currentMusic = musicTracks[index];
-  if (currentMusic) {
-    currentMusic.volume = currentVolume;
-    
-    // Update the preview text
-    const select = document.getElementById('musicSelect');
-    if (select && select.options[index]) {
-      const trackName = select.options[index].text;
-      document.getElementById('currentTrackName').textContent = trackName;
-    }
-    
-    if (isMusicPlaying) {
-      currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-    }
-  }
-}
-
-function toggleMusic() {
-  isMusicPlaying = !isMusicPlaying;
-  const btn = document.getElementById("toggleMusic");
-  if (isMusicPlaying && currentMusic) {
-    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
-    btn.innerHTML = '<span class="icon">🔊</span>';
-  } else if (currentMusic) {
-    currentMusic.pause();
-    btn.innerHTML = '<span class="icon">🔇</span>';
-  }
-}
-
-function updateVolume(value) {
-  currentVolume = value;
-  localStorage.setItem('volume', value);
-  musicTracks.forEach(track => {
-    if (track) {
-      track.volume = value;
-    }
-  });
-}
-
-// Game initialization
 function init() {
   if (gameInterval) {
     clearInterval(gameInterval);
@@ -188,20 +80,78 @@ function init() {
   document.getElementById("currentScore").textContent = score;
 }
 
-function createFood() {
-  let newFood;
-  do {
-    newFood = {
-      x: Math.floor(Math.random() * (canvasSize/box)) * box,
-      y: Math.floor(Math.random() * (canvasSize/box)) * box
-    };
-  } while (isOnSnake(newFood));
-  
-  food = newFood;
+function drawSnakeAndFood(ctx) {
+  // Draw snake with smooth corners
+  for (let i = 0; i < snake.length; i++) {
+    ctx.beginPath();
+    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
+    ctx.fillStyle = snakeColor;
+    ctx.fill();
+    
+    if (i > 0) {
+      const curr = snake[i];
+      const prev = snake[i-1];
+      ctx.fillStyle = snakeColor;
+      if (curr.x === prev.x) {
+        const y = Math.min(curr.y, prev.y);
+        ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
+      } else {
+        const x = Math.min(curr.x, prev.x);
+        ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
+      }
+    }
+  }
+
+  // Draw food as a smooth circle
+  ctx.beginPath();
+  ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
 }
 
-function isOnSnake(position) {
-  return snake.some(segment => segment.x === position.x && segment.y === position.y);
+function collision(head, array) {
+  // Skip collision check with the tail piece that's about to be removed
+  // This prevents false collisions when the snake is moving
+  const checkArray = array.slice(0, -1);
+  return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
+}
+
+function isValidNextDirection(current, next) {
+  if (!current) return true;
+  
+  const opposites = {
+    'ArrowUp': 'ArrowDown',
+    'ArrowDown': 'ArrowUp',
+    'ArrowLeft': 'ArrowRight',
+    'ArrowRight': 'ArrowLeft'
+  };
+  
+  return next !== opposites[current];
+}
+
+function direction(event) {
+  const key = event.key;
+  if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
+  
+  event.preventDefault();
+  
+  if (isValidNextDirection(currentDirection, key) && !isOppositeDirection(lastProcessedDirection, key)) {
+    nextDirection = key;
+    const now = Date.now();
+    if (now - lastMoveTime >= gameSpeeds[currentLevel] * 0.5) {
+      currentDirection = nextDirection;
+    }
+  }
+}
+
+function isOppositeDirection(dir1, dir2) {
+  if (!dir1 || !dir2) return false;
+  return (
+    (dir1 === 'ArrowUp' && dir2 === 'ArrowDown') ||
+    (dir1 === 'ArrowDown' && dir2 === 'ArrowUp') ||
+    (dir1 === 'ArrowLeft' && dir2 === 'ArrowRight') ||
+    (dir1 === 'ArrowRight' && dir2 === 'ArrowLeft')
+  );
 }
 
 function draw() {
@@ -290,58 +240,205 @@ function draw() {
   lastMoveTime = now;
 }
 
-function drawSnakeAndFood(ctx) {
-  // Draw snake with smooth corners
-  for (let i = 0; i < snake.length; i++) {
-    ctx.beginPath();
-    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, 2 * Math.PI);
-    ctx.fillStyle = snakeColor;
-    ctx.fill();
+// Game functions
+function startGame() {
+  console.log("Starting game...");
+  
+  if (isPlaying) {
+    console.log("Game already in progress");
+    return;
+  }
+  
+  currentLevel = parseInt(document.getElementById("levelSelect").value);
+  console.log("Selected level:", currentLevel);
+  
+  init();
+  isPlaying = true;
+  
+  hideAllScreens();
+  document.getElementById("game-screen").classList.add("active");
+  
+  if (isMusicPlaying && currentMusic) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+  }
+  
+  document.removeEventListener("keydown", direction);
+  document.addEventListener("keydown", direction);
+  
+  console.log("Starting game loop with speed:", gameSpeeds[currentLevel]);
+  gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
+}
+
+// Initialize high scores
+let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
+  1: 0,
+  2: 0,
+  3: 0
+};
+
+// Initialize global high scores
+let globalHighScores = {
+  1: { score: 0, player: 'None' },
+  2: { score: 0, player: 'None' },
+  3: { score: 0, player: 'None' }
+};
+
+// Random name generation
+const adjectives = ['Swift', 'Sneaky', 'Slithery', 'Speedy', 'Smooth', 'Silent', 'Stealthy', 'Skilled'];
+const nouns = ['Snake', 'Serpent', 'Viper', 'Python', 'Cobra', 'Mamba', 'Asp', 'Boa'];
+
+function generateRandomName() {
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const number = Math.floor(Math.random() * 1000);
+  return `${adj}${noun}${number}`;
+}
+
+// Initialize player name immediately
+let playerName = localStorage.getItem('playerName');
+if (!playerName) {
+  playerName = generateRandomName();
+  localStorage.setItem('playerName', playerName);
+}
+
+// Global functions
+function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  localStorage.setItem('darkMode', isDarkMode);
+  document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  document.getElementById('themeToggle').innerHTML = `<span class="icon">${isDarkMode ? '🌜' : '🌞'}</span>`;
+  
+  // Update snake color for better visibility in dark mode
+  if (typeof snakeColor !== 'undefined') {
+    snakeColor = isDarkMode ? "#00ff00" : "#00cc00";
+  }
+}
+
+function switchMusic(index) {
+  if (index >= musicTracks.length || !musicTracks[index]) {
+    console.log("Music track not available:", index);
+    return;
+  }
+  
+  if (currentMusic) {
+    currentMusic.pause();
+    currentMusic.currentTime = 0;
+  }
+  
+  currentMusic = musicTracks[index];
+  if (currentMusic) {
+    currentMusic.volume = currentVolume;
     
-    if (i > 0) {
-      const curr = snake[i];
-      const prev = snake[i-1];
-      ctx.fillStyle = snakeColor;
-      if (curr.x === prev.x) {
-        const y = Math.min(curr.y, prev.y);
-        ctx.fillRect(curr.x + 2, y + box/2, box - 4, box);
-      } else {
-        const x = Math.min(curr.x, prev.x);
-        ctx.fillRect(x + box/2, curr.y + 2, box, box - 4);
-      }
+    // Update the preview text
+    const select = document.getElementById('musicSelect');
+    if (select && select.options[index]) {
+      const trackName = select.options[index].text;
+      document.getElementById('currentTrackName').textContent = trackName;
+    }
+    
+    if (isMusicPlaying) {
+      currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    }
+  }
+}
+
+function toggleMusic() {
+  isMusicPlaying = !isMusicPlaying;
+  const btn = document.getElementById("toggleMusic");
+  if (isMusicPlaying && currentMusic) {
+    currentMusic.play().catch(e => console.log("Audio playback failed:", e));
+    btn.innerHTML = '<span class="icon">🔊</span>';
+  } else if (currentMusic) {
+    currentMusic.pause();
+    btn.innerHTML = '<span class="icon">🔇</span>';
+  }
+}
+
+function updateVolume(value) {
+  currentVolume = value;
+  localStorage.setItem('volume', value);
+  musicTracks.forEach(track => {
+    if (track) {
+      track.volume = value;
+    }
+  });
+}
+
+function updateHighScoresDisplay() {
+  console.log('Updating high scores display');
+  console.log('Local scores:', highScores);
+  console.log('Global scores:', globalHighScores);
+
+  const highScoresList = document.getElementById('highScoresList');
+  if (highScoresList) {
+    highScoresList.innerHTML = '';
+    for (let level = 1; level <= 3; level++) {
+      highScoresList.innerHTML += `
+        <div class="high-score-entry">
+          <span>Level ${level}</span>
+          <span>${highScores[level]}</span>
+        </div>`;
     }
   }
 
-  // Draw food as a smooth circle
-  ctx.beginPath();
-  ctx.arc(food.x + box/2, food.y + box/2, box/2 - 2, 0, 2 * Math.PI);
-  ctx.fillStyle = "red";
-  ctx.fill();
+  const globalHighScoresList = document.getElementById('globalHighScoresList');
+  if (globalHighScoresList) {
+    globalHighScoresList.innerHTML = '';
+    for (let level = 1; level <= 3; level++) {
+      const data = globalHighScores[level] || { score: 0, player: 'None' };
+      globalHighScoresList.innerHTML += `
+        <div class="global-score-entry">
+          <span>Level ${level}</span>
+          <span><span class="player-name">${data.player}</span>: ${data.score}</span>
+        </div>`;
+    }
+  }
 }
 
-function collision(head, array) {
-  // Skip collision check with the tail piece that's about to be removed
-  // This prevents false collisions when the snake is moving
-  const checkArray = array.slice(0, -1);
-  return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
+function updateGlobalHighScoresDisplay() {
+  const globalHighScoresList = document.getElementById('globalHighScoresList');
+  if (!globalHighScoresList) return;
+  
+  globalHighScoresList.innerHTML = '';
+  Object.entries(globalHighScores).forEach(([level, data]) => {
+    globalHighScoresList.innerHTML += `
+      <div class="global-score-entry">
+        <span>Level ${level}</span>
+        <span><span class="player-name">${data.player}</span>: ${data.score}</span>
+      </div>`;
+  });
 }
 
-function goHome() {
+function gameOver() {
+  isPlaying = false;
+  
+  // Clear the game interval
   if (gameInterval) {
     clearInterval(gameInterval);
     gameInterval = null;
   }
-  hideAllScreens();
-  document.getElementById("home-screen").classList.add("active");
+  
+  // Remove keyboard listener
+  document.removeEventListener("keydown", direction);
+  
+  // Check and update local high score
+  if (score > highScores[currentLevel]) {
+    highScores[currentLevel] = score;
+    localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
+    
+    // Try to update global high score
+    updateGlobalHighScore(currentLevel, score);
+  }
+  
+  // Update displays
   updateHighScoresDisplay();
-}
-
-function playAgain() {
-  if (gameInterval) {
-    clearInterval(gameInterval);
-    gameInterval = null;
-  }
-  startGame();
+  
+  // Switch to game over screen
+  hideAllScreens();
+  document.getElementById("game-over-screen").classList.add("active");
+  document.getElementById("finalScore").textContent = score;
+  document.getElementById("finalLevel").textContent = currentLevel;
+  document.getElementById("levelHighScore").textContent = highScores[currentLevel];
 }
 
 // Wait for DOM to be fully loaded before accessing elements
@@ -448,122 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Movement queue system
   let currentDirection = null;
   let nextDirection = null;
-
-  // Update high scores display
-  function updateHighScoresDisplay() {
-    console.log('Updating high scores display');
-    console.log('Local scores:', highScores);
-    console.log('Global scores:', globalHighScores);
-
-    const highScoresList = document.getElementById('highScoresList');
-    if (highScoresList) {
-      highScoresList.innerHTML = '';
-      for (let level = 1; level <= 3; level++) {
-        highScoresList.innerHTML += `
-          <div class="high-score-entry">
-            <span>Level ${level}</span>
-            <span>${highScores[level]}</span>
-          </div>`;
-      }
-    }
-
-    const globalHighScoresList = document.getElementById('globalHighScoresList');
-    if (globalHighScoresList) {
-      globalHighScoresList.innerHTML = '';
-      for (let level = 1; level <= 3; level++) {
-        const data = globalHighScores[level] || { score: 0, player: 'None' };
-        globalHighScoresList.innerHTML += `
-          <div class="global-score-entry">
-            <span>Level ${level}</span>
-            <span><span class="player-name">${data.player}</span>: ${data.score}</span>
-          </div>`;
-      }
-    }
-  }
-
-  function updateGlobalHighScoresDisplay() {
-    const globalHighScoresList = document.getElementById('globalHighScoresList');
-    if (!globalHighScoresList) return;
-    
-    globalHighScoresList.innerHTML = '';
-    Object.entries(globalHighScores).forEach(([level, data]) => {
-      globalHighScoresList.innerHTML += `
-        <div class="global-score-entry">
-          <span>Level ${level}</span>
-          <span><span class="player-name">${data.player}</span>: ${data.score}</span>
-        </div>`;
-    });
-  }
-
-  function direction(event) {
-    const key = event.key;
-    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
-    
-    event.preventDefault();
-    
-    if (isValidNextDirection(currentDirection, key) && !isOppositeDirection(lastProcessedDirection, key)) {
-      nextDirection = key;
-      const now = Date.now();
-      if (now - lastMoveTime >= gameSpeeds[currentLevel] * 0.5) {
-        currentDirection = nextDirection;
-      }
-    }
-  }
-
-  function isValidNextDirection(current, next) {
-    if (!current) return true;
-    
-    const opposites = {
-      'ArrowUp': 'ArrowDown',
-      'ArrowDown': 'ArrowUp',
-      'ArrowLeft': 'ArrowRight',
-      'ArrowRight': 'ArrowLeft'
-    };
-    
-    return next !== opposites[current];
-  }
-
-  function isOppositeDirection(dir1, dir2) {
-    if (!dir1 || !dir2) return false;
-    return (
-      (dir1 === 'ArrowUp' && dir2 === 'ArrowDown') ||
-      (dir1 === 'ArrowDown' && dir2 === 'ArrowUp') ||
-      (dir1 === 'ArrowLeft' && dir2 === 'ArrowRight') ||
-      (dir1 === 'ArrowRight' && dir2 === 'ArrowLeft')
-    );
-  }
-
-  function gameOver() {
-    isPlaying = false;
-    
-    // Clear the game interval
-    if (gameInterval) {
-      clearInterval(gameInterval);
-      gameInterval = null;
-    }
-    
-    // Remove keyboard listener
-    document.removeEventListener("keydown", direction);
-    
-    // Check and update local high score
-    if (score > highScores[currentLevel]) {
-      highScores[currentLevel] = score;
-      localStorage.setItem('snakeHighScores', JSON.stringify(highScores));
-      
-      // Try to update global high score
-      updateGlobalHighScore(currentLevel, score);
-    }
-    
-    // Update displays
-    updateHighScoresDisplay();
-    
-    // Switch to game over screen
-    hideAllScreens();
-    document.getElementById("game-over-screen").classList.add("active");
-    document.getElementById("finalScore").textContent = score;
-    document.getElementById("finalLevel").textContent = currentLevel;
-    document.getElementById("levelHighScore").textContent = highScores[currentLevel];
-  }
 
   // Add function to generate new random name
   function regeneratePlayerName() {
