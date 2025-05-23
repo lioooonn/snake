@@ -34,7 +34,6 @@
   <audio id="gameMusic4" loop>
     <source src="music/track4.mp3" type="audio/mp3">
   </audio>
-  <!-- Temporarily disabled until music files are available
   <audio id="gameMusic5" loop>
     <source src="music/track5.mp3" type="audio/mp3">
   </audio>
@@ -59,7 +58,6 @@
   <audio id="gameMusic12" loop>
     <source src="music/track12.mp3" type="audio/mp3">
   </audio>
-  -->
 
   <!-- Music controls -->
   <div class="music-controls">
@@ -71,6 +69,14 @@
           <option value="2">(01) Snek's Theme</option>
           <option value="3">(02) Puzzle Garden</option>
           <option value="4">(03) Tall Grass</option>
+          <option value="5">(04) Cherry Picking</option>
+          <option value="6">(05) Empty</option>
+          <option value="7">(06) Empty</option>
+          <option value="8">(07) Empty</option>
+          <option value="9">(08) Steak N Snake</option>
+          <option value="10">(09) Snakesolation</option>
+          <option value="11">(10) FangRX</option>
+          <option value="12">(11) Empty</option>
         </select>
       </div>
       <div class="volume-control">
@@ -131,9 +137,9 @@
   <!-- GAME OVER SCREEN -->
   <div class="screen" id="game-over-screen">
     <div class="content-container">
-      <img id="game-over-graphic" src="game-over.png" alt="Game Over" />
-      <h2>Game Over!</h2>
-      <p>Final Score: <span id="finalScore">0</span></p>
+      <img id="game-over-graphic" src="game-over-graphic.png" alt="Game Over" />
+      <h2>Play Again?</h2>
+      <p>Score: <span id="finalScore">0</span></p>
       <p>Level: <span id="finalLevel">1</span></p>
       <p>Level High Score: <span id="levelHighScore">0</span></p>
       <button id="playAgainButton">Play Again</button>

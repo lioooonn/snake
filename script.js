@@ -23,6 +23,20 @@ const EDGE_WAIT_TIME = 25;
 const canvasSize = 400;
 const box = 20;
 
+// Initialize high scores
+let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
+  1: 0,
+  2: 0,
+  3: 0
+};
+
+// Initialize global high scores
+let globalHighScores = {
+  1: { score: 0, player: 'None' },
+  2: { score: 0, player: 'None' },
+  3: { score: 0, player: 'None' }
+};
+
 const gameSpeeds = {
   1: 130, // Normal speed
   2: 100, // Fast
@@ -172,20 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('homeButton').addEventListener('click', goHome);
   document.getElementById('playAgainButton').addEventListener('click', playAgain);
 
-  // Initialize high scores
-  let highScores = JSON.parse(localStorage.getItem('snakeHighScores')) || {
-    1: 0,
-    2: 0,
-    3: 0
-  };
-
-  // Initialize global high scores with default values
-  let globalHighScores = {
-    1: { score: 0, player: 'None' },
-    2: { score: 0, player: 'None' },
-    3: { score: 0, player: 'None' }
-  };
-
   // Wait for Firebase to initialize
   if (window.firebaseInitialized) {
     console.log('Firebase was initialized before script.js loaded');
@@ -296,11 +296,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Game initialization
+  // Game utility functions
+  function hideAllScreens() {
+    document.getElementById("home-screen").classList.remove("active");
+    document.getElementById("game-screen").classList.remove("active");
+    document.getElementById("game-over-screen").classList.remove("active");
+  }
+
   function init() {
     // Clear any existing game interval
     if (gameInterval) {
       clearInterval(gameInterval);
+      gameInterval = null;
     }
     
     // Initialize snake
@@ -341,23 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return snake.some(segment => segment.x === position.x && segment.y === position.y);
   }
 
-  // Direction validation
-  function isValidNextDirection(current, next) {
-    if (!current) return true;
-    
-    const opposites = {
-      'ArrowUp': 'ArrowDown',
-      'ArrowDown': 'ArrowUp',
-      'ArrowLeft': 'ArrowRight',
-      'ArrowRight': 'ArrowLeft'
-    };
-    
-    return next !== opposites[current];
-  }
-
-  // Event listeners
-  document.addEventListener("keydown", direction);
-
   function direction(event) {
     const key = event.key;
     if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
@@ -371,6 +361,19 @@ document.addEventListener('DOMContentLoaded', function() {
         currentDirection = nextDirection;
       }
     }
+  }
+
+  function isValidNextDirection(current, next) {
+    if (!current) return true;
+    
+    const opposites = {
+      'ArrowUp': 'ArrowDown',
+      'ArrowDown': 'ArrowUp',
+      'ArrowLeft': 'ArrowRight',
+      'ArrowRight': 'ArrowLeft'
+    };
+    
+    return next !== opposites[current];
   }
 
   function isOppositeDirection(dir1, dir2) {
@@ -398,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Draw snake and food
-    drawSnakeAndFood();
+    drawSnakeAndFood(ctx);
     
     // Process movement queue
     if (nextDirection && isValidNextDirection(currentDirection, nextDirection)) {
@@ -466,8 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
     lastMoveTime = now;
   }
 
-  // Helper function to draw snake and food
-  function drawSnakeAndFood() {
+  function drawSnakeAndFood(ctx) {
     // Draw snake with smooth corners
     for (let i = 0; i < snake.length; i++) {
       ctx.beginPath();
@@ -503,13 +505,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return checkArray.some(segment => segment.x === head.x && segment.y === head.y);
   }
 
-  function hideAllScreens() {
-    document.getElementById("home-screen").classList.remove("active");
-    document.getElementById("game-screen").classList.remove("active");
-    document.getElementById("game-over-screen").classList.remove("active");
-  }
-
-  // Game start function
   function startGame() {
     console.log("Starting game..."); // Debug log
     
@@ -531,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("game-screen").classList.add("active");
     
     // Start music if enabled
-    if (isMusicPlaying) {
+    if (isMusicPlaying && currentMusic) {
       currentMusic.play().catch(e => console.log("Audio playback failed:", e));
     }
     
@@ -543,23 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Starting game loop with speed:", gameSpeeds[currentLevel]); // Debug log
     gameInterval = setInterval(draw, gameSpeeds[currentLevel]);
   }
-
-  // Initialize displays when DOM is loaded
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initial high scores display
-    updateHighScoresDisplay();
-    
-    // Set up play button
-    const playButton = document.getElementById('playButton');
-    if (playButton) {
-      playButton.onclick = function() {
-        console.log("Play button clicked");
-        startGame();
-      };
-    } else {
-      console.error("Play button not found!");
-    }
-  });
 
   function gameOver() {
     isPlaying = false;
